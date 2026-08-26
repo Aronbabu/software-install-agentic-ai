@@ -1,0 +1,77 @@
+
+✅ File 1 — app/models.py
+✅ File 2 — app/schemas.py
+✅ File 3 — app/routes/jobs.py
+✅ File 4 — app/services/job_lifecycle.py
+✅ File 5 — app/services/execution_service.py
+✅ File 6 — Alembic migration
+
+test
+A. Create immediate job
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM600001"
+      target_host      = "server01.company.net"
+      os_type          = "windows"
+      software_name    = "7zip"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+$response
+
+A.1 Execute normal job:
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+  -Method Post
+
+A.2 Check progress:
+
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/progress" `
+  -Method Get | ConvertTo-Json -Depth 8
+
+PENDING
+  ↓
+VALIDATING
+  ↓
+RUNNING
+  ↓
+VERIFYING
+  ├── SUCCESS
+  ├── FAILED
+  └── FAILED_FINAL
+``
+
+``
+
+B. Create scheduled placeholder job
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM600002"
+      target_host      = "server02.company.net"
+      os_type          = "windows"
+      software_name    = "7zip"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "scheduled"
+      scheduled_time   = "2026-06-16T23:00:00"
+  } | ConvertTo-Json -Depth 5)
+
+execute requested
+   ↓
+attempt 1
+   ↓
+attempt 2 (if needed)
+   ↓
+attempt 3 (if needed)
+   ├── SUCCESS → downstream success hook
+   └── FAILED_FINAL → downstream manual fallback hook

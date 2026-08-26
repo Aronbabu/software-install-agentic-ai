@@ -1,0 +1,58 @@
+PoC-4
+
+SOP Repository
+Knowledge Repository
+       ↓
+AI Search
+       ↓
+Azure OpenAI
+``
+✅ Stream 3 - SOP Repository Foundation
+sops/
+├── windows/
+├── linux/
+├── verification/
+└── rollback/
+``
+
+--------
+SOP:
+Install Java 21
+Step 1
+Step 2
+Step 3
+✅ Stream 4 - Knowledge Repository
+Knowledge Article:
+Java 21 Support Matrix
+Common Installation Issues
+Troubleshooting
+✅ Stream 1 - Azure OpenAI Readiness
+✅ Stream 2 - AI Search Readiness
+✅ Stream 5 - Document Format Standardization
+
+PoC-5
+AI Planner
+     ↓
+RAG
+     ↓
+Execution Plan
+
+-------------------
+plan:
+This Week
+Azure OpenAI access validation
+Azure AI Search access validation
+Create SOP folder structure
+Collect 5-10 sample SOPs
+Create metadata schema
+
+Next
+RAG PoC
+Retrieval validation
+AI Planner PoC
+AI Recovery PoC
+Then
+MCP Gateway
+Windows MCP
+Linux MCP
+Agent Integration

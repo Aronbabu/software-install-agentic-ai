@@ -1,0 +1,52 @@
+1. execution polity
+
+"curl": {
+    "install": "apt-get update && apt-get install -y curl",
+    "verify": "which curl"
+}
+
+
+2.linux_Executor
+
+replace this command = get_execution_command(...)
+to
+policy = get_execution_command("linux", job.software_name)
+
+install_cmd = policy["install"]
+verify_cmd = policy["verify"]
+
+stdin, stdout, stderr = client.exec_command(install_cmd)
+exit_code = stdout.channel.recv_exit_status()
+
+stdin, stdout, stderr = client.exec_command(verify_cmd)
+verify_output = stdout.read().decode()
+
+success = "curl" in verify_output
+
+return ExecutionResult(
+    success=success,
+    exit_code=exit_code,
+    stdout=verify_output,
+    stderr="",
+    duration_seconds=duration,
+    transport="ssh"
+)
+
+
+2. Update execution_service
+append_job_step(
+    step_name="execution_result",
+``
+
+
+# ✅ ✅ NEW: verification result step
+append_job_step(
+    db=db,
+    job_id=job.id,
+    step_name="verification_result",
+    status="SUCCESS" if result.success else "FAILED",
+    message=f"Verification output: {result.stdout}",
+    exit_code=result.exit_code,
+)
+
+db.commit()

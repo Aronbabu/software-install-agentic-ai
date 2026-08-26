@@ -1,0 +1,97 @@
+docker login
+
+jobs.py
+@router.post("/{job_id}/execute")
+def execute(job_id: str, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    # Step 1 → VALIDATING
+    if job.status == JobStatus.PENDING:
+        update_job_status(db, job, JobStatus.VALIDATING, "Validation started")
+
+    # Step 2 → RUNNING
+    if job.status == JobStatus.VALIDATING:
+        update_job_status(db, job, JobStatus.RUNNING, "Execution started")
+
+    result = execute_job(db, job)
+
+    # ✅ NEW Step → VERIFYING
+    if job.status == JobStatus.RUNNING:
+        update_job_status(db, job, JobStatus.VERIFYING, "Verification started")
+
+    # ✅ FINAL Step → SUCCESS / FAILED
+    if result == "SUCCESS":
+        update_job_status(db, job, JobStatus.SUCCESS, "Execution completed")
+    else:
+        update_job_status(db, job, JobStatus.FAILED, "Execution failed")
+   
+    if job.status in [JobStatus.SUCCESS, JobStatus.FAILED]:
+     raise HTTPException(status_code=400, detail="Job already completed")
+
+
+    return job
+testing
+
+create a fres job
+---------------
+$response = Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs" `
+-Method Post `
+-ContentType "application/json" `
+-Body (@{
+    ticket_id = "RITM200006"
+    target_host = "server01.company.net"
+    os_type = "windows"
+    software_name = "7zip"
+} | ConvertTo-Json)
+
+$response
+
+to triger execute, which will change its status to simulate from pending to validating->running and success
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+to see last status which is success:
+---------------------------------
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)"
+
+🔹 Components working together
+
+
+
+ComponentStatusFastAPI APIs✅PostgreSQL (jobs, steps)✅Alembic migrations✅Lifecycle engine✅Execution service✅OS-based executor logic✅API-driven orchestration✅
+
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)" `
+-Method Get
+
+to test software status on container linux vm
+
+ssh root@127.0.0.1 -p 2222
+password : root
+vim --version
+
+//both celery and docker linux runs on 127.0.0.1 so we need to pass as host like below
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000206"
+      target_host      = "host.docker.internal"
+      os_type          = "linux"
+      software_name    = "curl"
+      software_version = "latest"
+      requested_by     = "aronbabu"
+      justification    = "Docker Linux SSH test through Redis Celery"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)

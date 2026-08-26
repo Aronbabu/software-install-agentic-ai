@@ -1,0 +1,48 @@
+1. execution_policy.py ✅ (UPDATE)
+"windows": {
+    "7zip": {
+        "install": "Write-Output \"Installing 7zip\"",
+        "verify": "Get-Command 7z"
+    }
+}
+``
+\\"install": "choco install -y 7zip", later readl implementation
+
+2. credential_provider.py ✅ (UPDATE)
+
+def get_windows_credentials():
+    return {
+        "username": os.getenv("WINRM_USERNAME", "Administrator"),
+        "password": os.getenv("WINRM_PASSWORD", "Password123"),
+        "transport": os.getenv("WINRM_TRANSPORT", "ntlm")
+    }
+``
+3. ✅ Make sure .env has:
+WINRM_USERNAME=Administrator
+WINRM_PASSWORD=Password123
+WINRM_TRANSPORT=ntlm
+
+
+4. 🟢  windows_executor.py ✅ (MAIN IMPLEMENTATION)
+
+
+5.remote server
+Enable-PSRemoting -Force
+Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP" -Enabled True
+``
+winrm quickconfig
+
+test from linux app server
+curl http://windows-ip:5985/wsman
+Test-WSMan -ComputerName "10.84.42.26"
+
+10.242.25.4
+
+docker
+
+docker run -it mcr.microsoft.com/windows/servercore:ltsc2022 powershell
+``
+
+Enable-PSRemoting -Force
+winrm quickconfig
+``

@@ -1,0 +1,329 @@
+Good News
+You DO NOT need to rewrite:
+
+job_lifecycle.py
+execution_service.py
+windows_executor.py
+linux_executor.py
+execution_policy.py
+models.py
+schemas.py
+
+The primary change is:
+
+Replace:
+app/queue/job_queue.py
+
+With:
+Redis + Celery task orchestration
+
+app/
+│
+├── celery_app.py
+├── tasks/
+│   ├── __init__.py
+│   └── execution_tasks.py
+│
+├── workers/
+│   └── celery_worker.py
+
+--------------
+
+Phase 2.5 Sprint Plan
+Sprint 1 – Redis Foundation
+docker-compose.yml
+Add Redis service:
+
+redis:
+  image: redis:7
+  container_name: redis
+  ports:
+    - "6379:6379"
+
+
+Sprint 2 – Celery Integration
+requirements.txt
+Add:
+celery
+redis
+flower
+
+pip install celery redis flower
+``
+
+Sprint 3 – Create Celery App
+New file:
+
+"# app/celery_app.py
+
+from celery import Celery
+
+celery_app = Celery(
+    "software_install",
+    broker="redis://localhost:6379/0",
+    backend="redis://localhost:6379/1"
+)
+
+celery_app.conf.task_track_started = True
+"
+
+Sprint 4 – Convert Worker
+Today:
+enqueue_job(job.id)
+future:
+process_job_task.delay(job.id)
+
+New Task Layer
+Create:
+# app/tasks/execution_tasks.py
+
+"from app.celery_app import celery_app
+from app.services.execution_service import process_job
+
+@celery_app.task(bind=True)
+def process_job_task(self, job_id):
+    process_job(job_id)
+"
+
+Notice:
+✅ Reuses current logic
+✅ Reuses current lifecycle
+✅ Reuses current executors
+
+Route Change(route/jobs.py) add the from app.tasks.execution_tasks import process_job_task along with
+Current:enqueue_job(job.id)
+
+Replace with:process_job_task.delay(job.id)
+That's it.
+
+Scheduled Execution Improvement
+You already support:
+
+execution_mode
+scheduled_time
+Today:Worker evaluates time
+
+With Celery:
+"
+process_job_task.apply_async(
+    args=[job.id],
+    eta=job.scheduled_time
+)
+"
+
+Benefits:
+✅ Native scheduling
+✅ Survives restart
+✅ Distributed
+
+Retry Refactor
+Current:
+retry_count
+requeue
+
+Eventually let Celery handle retries:
+
+self.retry(exc=e)
+
+However:
+Keep your DB retry tracking.
+Reason:ServiceNow
+Audit
+Reporting
+need those values in PostgreSQL.
+
+Monitoring Upgrade
+Add Flower:
+celery -A app.celery_app worker
+celery -A app.celery_app flower
+
+Provides:
+Running jobs
+Scheduled jobs
+Failed jobs
+Worker health
+
+Docker Deployment
+Future docker-compose:
+
+"
+services:
+
+  postgres:
+    ...
+
+  redis:
+    image: redis:7
+
+  api:
+    build: .
+    depends_on:
+      - postgres
+      - redis
+
+  celery-worker:
+    build: .
+    command: celery -A app.celery_app worker --loglevel=info
+    depends_on:
+      - redis
+      - postgres
+
+  flower:
+    image: mher/flower
+``
+
+day 2------------
+
+app/
+├── services/
+│   ├── execution_service.py
+├── routes/
+│   ├── jobs.py
+├── executors/
+├── queue/
+│   └── job_queue.py   ← will eventually retire
+
+
+"
+
+1. Scheduled Execution (ETA)
+Current
+In jobs.py
+enqueue_job(job.id)
+replace to
+process_job_task.delay(job.id)
+
+b.Replace with
+File only changes
+app/routes/jobs.py
+
+add from app.tasks.execution_tasks import process_job_task
+enqueue_job(job.id)
+
+return ExecuteResponse(
+    job_id=job.id,
+    message="Job queued for execution"
+)
+with
+if (
+    job.execution_mode == "scheduled"
+    and job.scheduled_time
+):
+    process_job_task.apply_async(
+        args=[job.id],
+        eta=job.scheduled_time
+    )
+
+    message = (
+        f"Job scheduled for {job.scheduled_time}"
+    )
+
+else:
+    process_job_task.delay(job.id)
+
+    message = "Job queued for execution"
+
+return ExecuteResponse(
+    job_id=job.id,
+    message=message
+)
+-------------
+2. Retry Refactor
+services/execution_service.py
+
+@celery_app.task(bind=True)
+def process_job_task(self, job_id):
+
+    try:
+        process_job(job_id)
+
+    except Exception as exc:
+
+        if self.request.retries >= 3:
+            raise
+
+        raise self.retry(
+            exc=exc,
+            countdown=60
+        )
+
+Celery Retry
+Handles:
+network drop
+redis restart
+worker crash
+
+DB Retry
+Handles:
+
+business visibility
+ServiceNow reporting
+audit
+Best practice is to have both.
+
+3. Monitoring Upgrade
+pip install flower add to requirements
+
+start flower
+celery -A app.celery_app flower
+default http://localhost:5555
+
+Queued jobs
+Running jobs
+Scheduled jobs
+Failed jobs
+Successful jobs
+Worker health
+Task runtime
+Retry count
+
+4. Add Monitoring Endpoint
+File
+app/routes/monitor_api.py
+from celery.task.control import inspect
+
+@router.get("/celery/status")
+def celery_status():
+
+    i = inspect()
+
+    return {
+        "active": i.active(),
+        "scheduled": i.scheduled(),
+        "registered": i.registered()
+    }
+
+Useful for:
+
+API Health
+Redis Health
+Worker Health
+
+5. Docker Changes
+add to docker compose
+redis:
+  image: redis:7
+  ports:
+    - "6379:6379"
+
+add worker
+celery-worker:
+  build: .
+  command: celery -A app.celery_app worker --loglevel=info
+  depends_on:
+    - redis
+    - postgres
+
+add flower
+flower:
+  image: mher/flower
+  ports:
+    - "5555:5555"
+  command: celery -A app.celery_app flower
+
+
+6. Celery Broker URL app/celery_app.py
+broker="redis://redis:6379/0"
+backend="redis://redis:6379/1"
+
+now test along with redis and celery, seems it required api app too run as container.

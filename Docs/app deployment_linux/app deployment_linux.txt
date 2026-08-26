@@ -1,0 +1,40 @@
+ I’ll give you Step-by-step Linux server deployment (gunicorn + systemd + production setup) 👍
+
+
+windos core docker container
+
+Not suitable for:
+
+Real WinRM authentication scenarios
+NTLM / Kerberos issues
+Domain accounts testing
+Firewall / network rules
+Real enterprise behavior
+Multi-node architecture
+
+Step 1 — Use Windows Server Core Container (Optional ✅)
+👉 Use it for:
+
+Validate executor logic
+Validate WinRM session creation
+Validate PowerShell execution
+
+✅ test file creation
+✅ test command execution
+❌ NOT full enterprise testing
+
+Step 2 — Move to Real Windows VM (MANDATORY ✅)
+👉 This is where your system becomes real
+Use:
+
+Hyper-V VM
+Azure VM
+Internal non-prod server
+
+
+👉 Test:
+✅ WinRM connectivity
+✅ Credentials (NTLM)
+✅ Retry behavior
+✅ FAILED_FINAL logic
+✅ Real package install

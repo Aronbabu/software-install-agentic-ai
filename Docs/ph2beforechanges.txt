@@ -1,0 +1,143 @@
+
+🔵 1. Add Retry Model (MANDATORY)
+
+✅ Add in models.py
+retry_count = Column(Integer, default=0)
+max_retries = Column(Integer, default=3)
+last_error = Column(Text, nullable=True)
+
+🔵 2. Add Execution Outcome State (IMPORTANT)
+current
+
+PENDING → VALIDATING → RUNNING → VERIFYING → SUCCESS / FAILED
+
+new
+FAILED (retry possible)
+FAILED_FINAL (after retries exhausted)
+
+🔵 3. Add Outcome Decision Layer (VERY IMPORTANT)
+
+current:execute_job → SUCCESS / FAILED
+
+required:execute → retry → retry → retry → final decision
+✅ Add logic in execution_service.py concept
+
+if result.success:
+    SUCCESS
+elif retry_count < max_retries:
+    retry
+else:
+    FAILED_FINAL
+
+🔵 4. Add “Execution Mode” (Silent Push)
+
+Software silent push (front door)
+(user selects downtime & time)
+
+✅ Add minimal placeholder now
+
+
+execution_mode = Column(String, default="immediate")  # immediate / scheduled
+scheduled_time = Column(DateTime, nullable=True)
+
+🔵 5. Add “Post Execution Hook” placeholder (CR / Ops)
+Close SCTask → Create CR → Ops validation → PIR
+👉 You do NOT need to implement integrations now
+✅ But you MUST design hooks
+
+✅ Add placeholder in execution_service
+
+
+def post_execution_handler(job):
+    pass
+✅ Later this will call:
+
+ServiceNow APIs
+CR creation
+Notification systems
+
+
+✅ ✅ ✅ What you should NOT change now
+
+❌ Do NOT change:
+
+queue design ✅
+worker model ✅
+lifecycle base flow ✅
+API structure ✅
+👉 Your current architecture already supports extension ✅
+
+✅ Your design already supports:
+
+
+Workflow NeedYour Systemautomated execution
+✅retry attempts
+✅ (needs enhancement)success flow
+✅failure flow
+✅observability
+✅parallel jobs
+
+
+🔴 Missing (add now)
+
+Feature				Why
+retry logic implementation	required by workflow
+FAILED_FINAL state		workflow branching
+execution_mode			silent push readiness
+scheduled_time			future scheduling
+post_execution hook		CR / Ops integration
+
+✅ ✅ ✅ Final Recommendation (very clear)
+
+✅ DO THIS NOW (small effort)
+✔ Add retry fields ✅
+✔ Add FAILED_FINAL state ✅
+✔ Add execution_mode + scheduled_time ✅
+✔ Add post-execution hook placeholder ✅
+
+✅ THEN proceed with Phase 2C
+👉 Real execution (WinRM / SSH)
+
+--------------
+
+Retry model fields (if not already finalized in your current branch)
+New terminal failure state: FAILED_FINAL
+Execution mode + scheduling placeholders
+Post-execution hook placeholder for CR / manual fallback / downstream workflow integration
+
+Job Created
+   ↓
+PENDING
+   ↓
+VALIDATING
+   ↓
+RUNNING
+   ↓
+VERIFYING
+   ├── SUCCESS
+   ├── FAILED        (optional direct failure path)
+   └── FAILED_FINAL  (retries exhausted / manual fallback)
+
+User raises request
+   ↓
+PM approval
+   ↓
+Automated silent push trigger
+   ↓
+Attempt 1
+   ↓
+Attempt 2 (if needed)
+   ↓
+Attempt 3 (if needed)
+   ├── Success → Close task / downstream integration placeholder
+   └── Failed after max retries → FAILED_FINAL → manual fallback placeholder
+
+
+Job Request
+   ↓
+execution_mode = immediate | scheduled
+scheduled_time = optional
+   ↓
+execute route / future scheduler service
+
+``

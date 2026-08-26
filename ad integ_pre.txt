@@ -1,0 +1,161 @@
+
+-----
+Authentication
+--------------
+✅ Azure AD SSO
+✅ Local App Account
+
+Authorization
+-------------
+✅ App Roles
+✅ App Groups
+✅ App Permissions
+
+Future
+------
+✅ Role Hierarchy
+✅ Approval Matrix
+✅ Resource Ownership
+✅ Context-Aware Access
+`
+--
+✅ SSO Login
+
+✅ User Identity
+
+✅ User Email
+
+✅ User Profile
+
+✅ JWT Authentication
+
+✅ Refresh Tokens
+
+Microsoft Graph Delegated Permissions
+openid
+profile
+email
+offline_access
+User.Read
+
+{
+  "oid": "user-object-id",
+  "name": "Aron Babu",
+  "email": "xxx@cognizant.com"
+}
+
+store in
+
+users
+------
+id
+aad_object_id
+email
+display_name
+status
+created_on
+last_login
+
+
+not all(if go with app level rabc)
+Group.Read.All
+Directory.Read.All
+User.Read.All
+
+
+Entra ID = Authentication only
+Application DB = Authorization + RBAC
+
+crate our own roles:
+roles
+------
+ADMIN
+PLATFORM_ADMIN
+OPERATOR
+APPROVER
+REQUESTER
+VIEWER
+user_roles
+------------
+user_id
+role_id
+
+groups
+---------
+Linux_Admins
+Windows_Admins
+Cloud_Admins
+HCS_Ops
+GNS_Ops
+Management
+
+React Portal
+      |
+      v
+Microsoft Entra ID
+      |
+      v
+FastAPI
+      |
+      v
+JWT Validation
+      |
+      v
+Users Table
+      |
+      +--> Roles Table
+      |
+      +--> Groups Table
+      |
+      +--> Permissions Table
+
+--------user@cognizant.com
+Entra Login
+      ↓
+JWT Token
+      ↓
+Extract Email
+      ↓
+Find User In App
+      ↓
+Apply App Roles
+
+local accounts:
+admin_local
+svc_aiops
+svc_scheduler
+svc_remediation
+stored in db
+users
+------
+id
+username
+email
+auth_type
+password_hash
+status
+
+auth_type
+---------
+LOCAL
+AAD
+
+User
+   ↓
+Role
+   ↓
+Permission
+
+recomendations:
+AAD Login          ✅ Preferred
+Local Login        ✅ Admin Controlled
+``
+LOCAL_ENABLED = false (default)
+
+admin_local
+svc_scheduler
+svc_remediation
+
+Only approved accounts use local authentication.
+
+This satisfies security teams much better.

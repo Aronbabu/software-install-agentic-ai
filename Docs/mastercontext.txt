@@ -1,0 +1,38 @@
+The platform is designed to automate software installation across Windows and Linux systems using a job-driven architecture. It integrates API, lifecycle management, execution engines, and future AI-based automation.
+
+phase1
+PostgreSQL database setup with jobs and job_steps tables
+Job lifecycle management (PENDING → VALIDATING → RUNNING → VERIFYING → SUCCESS/FAILED)
+Worker queue system for asynchronous processing
+Retry logic and failure handling
+Structured logging and trace_id tracking
+Progress API with detailed step visibility
+
+phase 2
+Base executor interface
+Separation of execution logic from services
+Software policy control
+Windows Execution - WinRM, NTLM, PS script
+Linux Execution - SSH,remote execution
+Error Handling
+Trace ID correlation across logs
+Testing
+
+phase 3
+Credential security
+Azure Key Vault integration
+CyberArk(later)
+Testing
+
+phase 4
+SOP file parsing
+Azure OpenAI integration
+
+
+phase 5
+MCP Architecture
+Convert executors into MCP tools
+AI agent-driven execution
+testing
+
+Phase 6 servcie Now integration

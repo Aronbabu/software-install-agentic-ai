@@ -1,0 +1,71 @@
+Main.py'
+remove:
+
+from app.queue.job_queue import start_workers, stop_workers
+from app.services.execution_service import process_job
+
+update with this
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 FastAPI Started")
+    yield
+    print("🛑 FastAPI Stopped")
+2. routes/jobs.py
+replace enqueue_job(job.id) or job_queue.put(job.id)
+
+process_job_task.apply_async(args=[job.id]
+
+ 
+   job.execution_mode == "scheduled"
+    and job.scheduled_time
+    ):
+        process_job_task.apply_async(
+            args=[job.id],
+            eta=job.scheduled_time
+        )
+
+--
+POST /jobs
+       ↓
+Insert record into PostgreSQL
+       ↓
+Status = PENDING
+       ↓
+process_job_task.delay(job.id)
+       ↓
+Redis Queue
+       ↓
+Celery Worker
+       ↓
+RUNNING
+       ↓
+VERIFYING
+       ↓
+SUCCESS / FAILED_FINAL
+--
+
+Monitoring APIs //app/queue/job_queue.py go invalid
+PostgreSQL Jobs
+Celery Inspect
+Flower Metrics
+
+--
+
+app/routes/jobs.py
+app/tasks/execution_tasks.py
+app/services/execution_service.
+
+execution_service.py:
+
+replace from app.queue.job_queue import enqueue_job with from app.tasks.execution_tasks import process_job_task
+
+retry logic add process_job_task.delay(job.id)
+
+
+
+docker compose down
+
+docker compose build --no-cache
+
+docker compose up -d

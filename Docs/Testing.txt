@@ -1,0 +1,151 @@
+Get-ChildItem -Recurse -Directory | Where-Object { $_.FullName -notlike "*\venvswinst*" } | Select-Object FullName
+Get-ChildItem -Recurse -Directory | Where-Object { $_.FullName -notlike "*\venvswinst*" } | ForEach-Object {
+    $Depth = ($_.FullName -split '\\').Count - ($Home -split '\\').Count
+    ("  " * $Depth) + "+-- " + $_.Name
+}
+
+tree /A | Select-String -Pattern "__pycache__" -NotMatch
+
+tree /A | Where-Object { $_ -notmatch 'venvswinst' -and $_ -notmatch '__pycache__' }
+
+tree "C:\Users\458027\OneDrive - Cognizant\D Drive\Learn\AIOps_HCS\Phase -1\software-install-mvp" /F | Where-Object { $_ -notmatch 'venvswinst|__pycache__' }
+step1:
+docker login
+
+C:\Users\458027\OneDrive - Cognizant\D Drive\Learn\AIOps_HCS\Phase -1\software-install-mvp
+docker compose up -d
+
+docker ps
+36d93278ecc4   postgres:16   "docker-entr
+
+go to venv and then load fastapi
+
+add any alembic versions
+
+uvicorn app.main:app --reload
+
+test http://127.0.0.1:8000/  //browser and check terminal its should be ok
+5. docker run -d -p 2222:22 --name linux-test rastasheep/ubuntu-sshd //first time
+
+docker start 967bfc638d5b //container name
+
+ssh root@127.0.0.1 -p 2222
+password : root
+
+curl --version
+
+
+after verifiction login
+
+uvicorn app.main:
+
+
+Testig
+
+$response = Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs" `
+-Method Post `
+-ContentType "application/json" `
+-Body (@{
+    ticket_id = "RITM9000202"
+    target_host = "127.0.0.2"
+    os_type = "linux"
+    software_name = "curl"
+} | ConvertTo-Json)
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000206"
+      target_host      = "host.docker.internal"
+      os_type          = "linux"
+      software_name    = "curl"
+      software_version = "latest"
+      requested_by     = "aronbabu"
+      justification    = "Docker Linux SSH test through Redis Celery"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/progress" `
+-Method Get | ConvertTo-Json -Depth 8
+
+
+
+
+phase1 +newworfkflow
+--------------------
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM700001"
+      target_host      = "server01.company.net"
+      os_type          = "windows"
+      software_name    = "7zip"
+      software_version = "24.09"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+
+--------
+phase 2b winrm
+\\Enable WinRM
+Enable-PSRemoting -Force
+\\Allow remote access
+winrm quickconfig
+ Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP" -Enabled True \\open firewall
+
+//testing winrm servie
+Get-Service -Name WinRM
+Test-WSMan
+winrm enumerate winrm/config/listener
+
+Test-WSMan -ComputerName "RemoteComputerName"
+Test-NetConnection -ComputerName "RemoteComputerName" -Port 5985
+Test-NetConnection -ComputerName "10.84.40.84" -Port 5986 \\success locally
+
+
+create job
+
+{
+  "ticket_id": "RITM900002",
+  "target_host": "windows-ip",
+  "os_type": "windows",
+  "software_name": "7zip"
+}
+
+$response = Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs" `
+-Method Post `
+-ContentType "application/json" `
+-Body (@{
+    ticket_id = "RITM900007"
+    target_host = "172.17.0.2"
+    os_type = "linux"
+    software_name = "vim"
+} | ConvertTo-Json)
+POST /jobs/{id}/execute
+GET /jobs/{id}/progress
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/progress" `
+-Method Get | ConvertTo-Json -Depth 8
+

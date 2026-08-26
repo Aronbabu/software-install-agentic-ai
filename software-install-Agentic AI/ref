@@ -1,0 +1,114 @@
+┌────────────────────────────────────────────────────────────┐
+│ Top Bar: Platform Name | Environment | Logged-in User       │
+├───────────────┬────────────────────────────────────────────┤
+│ Sidebar       │ Main Content Area                          │
+│               │                                            │
+│ Dashboard     │ KPI Cards                                  │
+│ Jobs          │ Tables                                     │
+│ Queue         │ Details Panels                             │
+│ Audit         │ Timeline                                   │
+│ Catalog       │ Forms                                      │
+│ RBAC          │ Charts                                     │
+│ Settings      │                                            │
+└───────────────┴────────────────────────────────────────────┘
+
+Primary color: #1F4E79
+Secondary: #2E75B6
+Success: #107C10
+Warning: #FFB900
+Failure: #D13438
+Background: #F5F7FA
+Cards: White
+Font: Segoe UI / Inter / Aptos
+
+Recommended First UI Milestone1
+
+Admin Portal Milestone 1
+- React app running
+- Sidebar and topbar
+- Dashboard page
+- Jobs page
+- Job details page
+- FastAPI integration working
+
+Admin Portal Milestone 2
+- Queue/worker monitoring
+- Audit page
+- Decision ledger page
+- Software catalog page
+
+Admin Portal Milestone 3
+- Entra ID
+- RBAC
+- Role-based navigation
+
+Dashboard
+--------------------------------------------------
+[Total Jobs] [Running] [Success] [Failed] [Workers]
+
+Recent Jobs
+--------------------------------------------------
+Job ID | Software | Target | Port | Status | Updated
+
+Failure Summary
+--------------------------------------------------
+Job ID | Failure Type | Remediation
+
+Worker Health
+--------------------------------------------------
+Worker | Status | Active | Processed | Failed
+
+Lifecycle
+
+PENDING
+VALIDATING
+RUNNING
+VERIFYING
+SUCCESS
+FAILED
+FAILED_FINAL
+
+
+portal/
+├── package.json
+├── vite.config.ts
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── api/
+│   │   ├── client.ts
+│   │   ├── jobsApi.ts
+│   │   ├── monitorApi.ts
+│   │   ├── auditApi.ts
+│   │   ├── catalogApi.ts
+│   │   └── authApi.ts
+│   ├── components/
+│   │   ├── layout/
+│   │   │   ├── AdminLayout.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Topbar.tsx
+│   │   ├── cards/
+│   │   │   └── MetricCard.tsx
+│   │   ├── tables/
+│   │   │   └── DataTable.tsx
+│   │   └── status/
+│   │       └── StatusBadge.tsx
+│   ├── pages/
+│   │   ├── Dashboard.tsx
+│   │   ├── Jobs.tsx
+│   │   ├── JobDetails.tsx
+│   │   ├── QueueWorkers.tsx
+│   │   ├── Audit.tsx
+│   │   ├── DecisionLedger.tsx
+│   │   ├── SoftwareCatalog.tsx
+│   │   ├── Authorization.tsx
+│   │   └── Settings.tsx
+│   ├── routes/
+│   │   └── routes.tsx
+│   ├── types/
+│   │   ├── job.ts
+│   │   ├── audit.ts
+│   │   ├── queue.ts
+│   │   └── catalog.ts
+│   └── styles/
+│       └── theme.css

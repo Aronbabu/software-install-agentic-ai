@@ -1,0 +1,14 @@
+start the docker
+cmd- docker login
+docker ps( software ai shoudl be runing)
+
+url:http://127.0.0.1:8000/ //result:{"message":"Software Install API is running","mode":"redis-celery","docs":"/docs"}
+
+celery:
+http://localhost:5555/workers
+
+admin portal: currently its not containr
+cd portal 
+npm run dev
+
+url:http://localhost:5173

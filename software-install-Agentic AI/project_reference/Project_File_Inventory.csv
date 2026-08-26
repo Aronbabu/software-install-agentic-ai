@@ -1,0 +1,75 @@
+File,Extension,Size(KB),Last Modified
+.env,,0.46,2026-07-22 15:49:16
+.env.example,.example,0.19,2026-05-29 16:55:10
+alembic.ini,.ini,0.62,2026-06-01 14:47:55
+deliverables,,6.52,2026-08-10 11:27:31
+docker-compose copy 2.yml,.yml,1.04,2026-07-15 15:12:33
+docker-compose copy 3.yml,.yml,1.06,2026-07-21 18:52:03
+docker-compose copy.yml,.yml,0.7,2026-07-14 15:28:42
+docker-compose.yml,.yml,1.92,2026-07-29 15:14:01
+docker-compose_redis.yml,.yml,0.58,2026-07-20 19:05:21
+docker-compose_updated.yml,.yml,1.69,2026-07-21 18:47:14
+Dockerfile,,0.22,2026-07-15 15:44:29
+fs2.txt,.txt,374.38,2026-07-15 11:06:51
+README.md,.md,0.58,2026-07-31 14:58:26
+redistest.py,.py,0.12,2026-07-15 15:23:17
+requirements.txt,.txt,0.22,2026-07-15 12:42:40
+alembic\env.py,.py,1.4,2026-06-05 15:45:24
+alembic\env1.py,.py,2.05,2026-06-05 15:48:08
+alembic\README,,0.04,2026-06-05 15:48:08
+alembic\script.py.mako,.mako,0.62,2026-06-05 15:48:08
+app\celery_app.py,.py,0.67,2026-07-29 15:03:22
+app\config.py,.py,0.91,2026-07-21 19:31:56
+app\db.py,.py,0.52,2026-07-22 15:50:07
+app\logging_config.py,.py,0.25,2026-05-31 16:49:32
+app\main.py,.py,1.92,2026-07-21 18:41:35
+app\middleware.py,.py,0.88,2026-06-01 18:55:56
+app\models.py,.py,2.55,2026-06-23 19:18:10
+app\schemas.py,.py,1.87,2026-06-21 20:09:20
+app\__init__.py,.py,0.0,2026-05-29 14:34:53
+project_reference\Master_Context copy.md,.md,7.05,2026-07-20 18:17:35
+project_reference\Master_Context.md,.md,6.54,2026-08-17 10:54:49
+project_reference\Master_Context_ph2.md,.md,6.45,2026-07-14 14:38:20
+project_reference\master_context_updated.txt,.txt,6.12,2026-08-04 14:20:19
+project_reference\Milestones.txt,.txt,6.2,2026-08-08 11:44:18
+project_reference\new_approach.md,.md,7.84,2026-08-05 19:00:16
+project_reference\new_milestones.md,.md,2.85,2026-08-05 19:00:16
+project_reference\new_plans.md,.md,1.78,2026-08-06 17:40:26
+project_reference\new_project_scope.md,.md,8.48,2026-08-05 12:06:05
+project_reference\new_scope_highlevel.md,.md,1.8,2026-08-05 12:53:08
+project_reference\new_timeline.md,.md,7.44,2026-08-11 17:19:43
+project_reference\Project_File_Inventory.csv,.csv,3.24,2026-07-29 14:42:25
+project_reference\project_metadata.yaml,.yaml,0.39,2026-07-01 18:59:15
+project_reference\Project_Structure.md,.md,3.02,2026-08-17 14:14:53
+project_reference\Project_Structure1.md,.md,1.64,2026-07-01 18:32:28
+project_reference\Project_Structure2.md,.md,2.23,2026-07-20 18:49:54
+project_reference\ref.txt,.txt,0.0,2026-08-04 14:24:09
+python tools\generate_project_structure.py,.py,3.45,2026-07-01 18:26:07
+python tools\project_reference\Project_File_Inventory.csv,.csv,0.16,2026-08-17 14:13:52
+python tools\project_reference\Project_Structure.md,.md,0.16,2026-08-17 14:13:52
+project_reference\fresh start\current_status.md,.md,0.79,2026-08-08 11:09:47
+project_reference\fresh start\master flow.md,.md,1.55,2026-08-07 19:23:51
+project_reference\fresh start\new_hybrid_mvp_full.md,.md,6.07,2026-08-11 17:19:43
+app\executors\linux_executor.py,.py,1.83,2026-06-23 16:27:48
+app\executors\result_models.py,.py,0.28,2026-06-07 17:38:54
+app\executors\windows_executor.py,.py,2.16,2026-07-01 14:08:43
+app\executors\__init__.py,.py,0.0,2026-06-02 15:57:37
+app\queue\job_queue.py,.py,0.51,2026-07-29 15:31:39
+app\queue\job_queue1.py,.py,2.52,2026-07-29 15:17:00
+app\queue\__init__.py,.py,0.0,2026-06-05 10:39:54
+app\routes\jobs.py,.py,6.74,2026-07-29 15:27:41
+app\routes\monitor_api.py,.py,1.95,2026-07-21 19:18:16
+app\routes\__init__.py,.py,0.0,2026-05-29 14:34:54
+app\services\credential_provider.py,.py,0.5,2026-06-21 19:42:29
+app\services\execution_policy.py,.py,1.87,2026-07-29 19:10:32
+app\services\execution_service.py,.py,6.19,2026-07-21 19:20:19
+app\services\job_lifecycle.py,.py,1.66,2026-06-15 19:35:41
+app\services\__init__.py,.py,0.0,2026-06-02 11:04:30
+app\tasks\execution_tasks.py,.py,2.67,2026-07-29 15:04:59
+app\tasks\__init__.py,.py,0.0,2026-07-14 15:08:06
+app\workers\celery_worker.py,.py,0.27,2026-07-20 19:08:05
+alembic\versions\0001_create_jobs_and_job_steps.py,.py,2.53,2026-06-01 15:13:23
+alembic\versions\0002_extend_job_status_lifecycle.py,.py,1.02,2026-06-02 11:51:23
+alembic\versions\003_add_execution_fields.py,.py,1.25,2026-06-05 16:23:49
+alembic\versions\004_add_workflow_ready_fields.py,.py,0.97,2026-06-15 18:29:32
+alembic\versions\005_add_final_failed_final_statu.py,.py,0.68,2026-06-23 18:52:51

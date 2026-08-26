@@ -1,0 +1,97 @@
+1.app/executors/result_model.py
+
+from pydantic import BaseModel
+from typing import Optional
+
+class ExecutionResult(BaseModel):
+    success: bool
+    exit_code: int
+    stdout: Optional[str] = None
+    stderr: Optional[str] = None
+    duration_seconds: Optional[float] = None
+
+2.app/services/credential_provider.py
+
+import os
+
+def get_linux_credentials():
+    return {
+        "username": os.getenv("SSH_USERNAME", "root"),
+        "password": os.getenv("SSH_PASSWORD", "root"),
+        "port": int(os.getenv("SSH_PORT", 2222))
+    }
+
+3. app/services/execution_policy.py
+APPROVED_COMMANDS = {
+    "linux": {
+        "curl": "echo Installing curl",
+        "vim": "echo Installing vim"
+    }
+}
+
+def get_command(os_type, software_name):
+    try:
+        return APPROVED_COMMANDS[os_type][software_name]
+    except KeyError:
+        raise ValueError(f"{software_name} not approved")
+``
+
+4.app/executors/linux_executor.py
+5. Update execution_service.py
+
+
+5. docker run -d -p 2222:22 --name linux-test rastasheep/ubuntu-sshd
+
+docker run -d -p 80:80 --name my-container nginx
+ssh root@127.0.0.1 -p 2222
+password : root
+
+
+python -c "import paramiko; print(paramiko.__version__)"
+python -c "import pydantic-settings; print(pydantic-settings.__version__)"
+
+
+uvicorn app.main:app --reload
+
+
+Testig
+
+$response = Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs" `
+-Method Post `
+-ContentType "application/json" `
+-Body (@{
+    ticket_id = "RITM900003"
+    target_host = "127.0.0.1"
+    os_type = "linux"
+    software_name = "vim"
+} | ConvertTo-Json)
+
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/progress" `
+-Method Get | ConvertTo-Json -Depth 8
+
+
+test1 "curl": "invalid_command_test" in execution policy for linux then test above it shold fail
+
+
+learnings
+Standard workflow (VERY IMPORTANT)
+Whenever you:
+🔹 Create new project copy
+🔹 Change DB
+🔹 Drop DB
+🔹 Move to different machine
+🔹 Move to new environment
+👉 You MUST run:
+
+alembic upgrade head
+
+
+
+

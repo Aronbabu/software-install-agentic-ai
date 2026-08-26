@@ -1,0 +1,82 @@
+APPROVED_PACKAGES = {
+
+    "windows": {
+
+        # ✅ BASIC FILE CREATION TEST
+        "create_file": {
+            "install": "New-Item -Path C:\\temp\\testfile.txt -ItemType File -Force",
+            "verify": "Test-Path C:\\temp\\testfile.txt"
+        },
+
+        # ✅ DIRECTORY CREATION
+        "create_folder": {
+            "install": "New-Item -Path C:\\temp\\testfolder -ItemType Directory -Force",
+            "verify": "Test-Path C:\\temp\\testfolder"
+        },
+
+        # ✅ SYSTEM INFO VALIDATION
+        "check_hostname": {
+            "install": "hostname",
+            "verify": "hostname"
+        },
+
+        # ✅ SERVICE LIST CHECK
+        "list_services": {
+            "install": "Get-Service | Select-Object -First 5",
+            "verify": "Get-Service | Select-Object -First 1"
+        },
+
+        # ✅ PROCESS CHECK
+        "check_process": {
+            "install": "Get-Process | Select-Object -First 5",
+            "verify": "Get-Process | Select-Object -First 1"
+        }
+
+    },
+
+    "linux": {
+        # keep your existing entries here
+    }
+}
+
+
+--
+
+docker context ls
+docker context show
+
+docker desktop engine use windows //docker desktop engine use linux
+
+docker run -it mcr.microsoft.com/windows/servercore:ltsc2022 powershell
+
+docker run -d -p 55985:5985 --name my-winrm-container mcr.microsoft.com/windows/servercore:ltsc2022
+``
+Enable-PSRemoting -Force
+winrm quickconfig
+``
+
+
+-- executor
+
+  success = False
+
+    #if job.software_name.lower() in verify_output.lower():
+    #    success = True
+    
+    if verify_output.strip():
+        if "true" in verify_output.lower():
+            success = True
+        elif verify_output.strip() != "":
+            success = True
+
+
+------testing
+
+
+{
+  "os_type": "windows",
+  "software_name": "create_file"
+}
+
+"software_name": "create_folder"
+"software_name": "check_hostname"

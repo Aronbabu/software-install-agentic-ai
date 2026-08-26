@@ -1,0 +1,162 @@
+🚀 ✅ Step-by-Step Linux Server Deployment (Production Style)
+
+1. on linux server
+sudo apt update
+sudo apt install -y python3 python3-pip python3-venv git
+
+2. deploy code
+
+git clone <your-repo-url>
+cd software-install-Agentic-AI
+
+3. creation venv
+
+python3 -m venv venv
+source venv/bin/activate
+
+4. pip install -r requirements.txt
+``
+
+5. nano .env
+APP_ENV=prod
+POSTGRES_HOST=<db-host>
+POSTGRES_DB=software_install
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=******
+SSH_USERNAME=root
+SSH_PASSWORD=root
+SSH_PORT=22
+WINRM_USERNAME=Administrator
+WINRM_PASSWORD=Password123
+WINRM_TRANSPORT=ntlm
+
+6.alembic upgrade head
+
+
+✅ Step 5 — Start with Gunicorn (Production Server)
+pip install gunicorn
+
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+
+
+Enable Background Worker (Important)
+✅ Option 1 (Simple start)
+Run your worker manually:
+python app/worker.py or 
+nohup python app/worker.py & //run in backgroun
+
+
+
+
+
+✅ Step 7 — Setup systemd (Production recommended)
+sudo nano /etc/systemd/system/ai-app.service  // Create service file
+
+add
+
+[Unit]
+Description=Agentic AI Execution API
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/software-install-Agentic-AI
+ExecStart=/home/ubuntu/software-install-Agentic-AI/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+worker service
+
+sudo nano /etc/systemd/system/ai-worker.service
+
+[Unit]
+Description=Agentic AI Worker
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/software-install-Agentic-AI
+ExecStart=/home/ubuntu/software-install-Agentic-AI/venv/bin/python app/worker.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+enable services:
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+
+sudo systemctl enable ai-app
+sudo systemctl enable ai-worker
+
+sudo systemctl start ai-app
+sudo systemctl start ai-worker
+
+
+Check staus
+systemctl status ai-app
+systemctl status ai-worker
+
+✅ Step 8 — Open Port
+
+sudo ufw allow 8000
+
+
+🟢 ✅ Step 9 — Test API from your laptop or other server
+
+Invoke-RestMethod http://<linux-server-ip>:8000/docs  //✅ Swagger UI should open
+
+
+🟢 ✅ Step 10 — Real Execution Testing
+
+🟢 ✅ Linux Remote
+
+{
+  "os_type": "linux",
+  "target_host": "<linux-target-ip>",
+  "software_name": "curl"
+}
+
+🔴 ✅ Windows Remote
+
+{
+  "os_type": "windows",
+  "target_host": "<windows-ip>",
+  "software_name": "create_file"
+}
+{
+  "os_type": "windows",
+  "software_name": "create_file",
+  "target_host": "<windows-ip>"
+}
+
+validate from linux
+
+✅ 1. Connectivity nc -zv <windows-ip> 5985
+
+
+Testing
+
+✅ 2. Execute
+POST /jobs
+POST /execute
+
+GET /progress
+
+check logs:
+journalctl -u ai-worker -f
+
+------------
+
+ You have now built:
+✔ Control plane
+✔ Execution engine
+✔ Deployment-ready system
+✔ Enterprise orchestration framework
+
+next is phase 3
+
+👉 Share results — I’ll help debug real infra issues (WinRM, firewall, auth) 👍
+

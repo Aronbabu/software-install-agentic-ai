@@ -1,0 +1,412 @@
+features:
+1. Execution policy file
+2 Add an allowlist mapper:
+
+ Extend your job schema slightly
+
+{
+  "target_host": "127.0.0.1",
+  "port": 2222,
+  "connection_type": "ssh",
+  "environment": "lab"
+}
+
+-----------
+
+
+
+Step A — Introduce a shared execution result model
+app/executors/result_models.py
+
+from pydantic import BaseModel
+from typing import Optional
+
+
+class ExecutionResult(BaseModel):
+    success: bool
+    exit_code: int
+    stdout: Optional[str] = None
+    stderr: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    transport: Optional[str] = None
+
+
+Step B — Credential abstraction
+app/services/credential_provider.py
+
+import os
+def get_windows_credentials():
+    return {
+        "username": os.getenv("WINRM_USERNAME"),
+        "password": os.getenv("WINRM_PASSWORD"),
+        "transport": os.getenv("WINRM_TRANSPORT", "ntlm"),
+    }
+
+def get_linux_credentials():
+    return {
+        "username": os.getenv("SSH_USERNAME"),
+        "password": os.getenv("SSH_PASSWORD"),
+        "private_key_path": os.getenv("SSH_PRIVATE_KEY_PATH"),
+    }
+This is a transitional recommendation from me, so that you can later swap it cleanly to Key Vault.
+
+
+Step C — Real Windows executor (pywinrm path)
+app/executors/windows_executor.py
+
+import time
+import winrm
+
+from app.executors.result_models import ExecutionResult
+from app.services.credential_provider import get_windows_credentials
+
+
+def run_windows(job):
+    creds = get_windows_credentials()
+
+    host = job.target_host
+    username = creds["username"]
+    password = creds["password"]
+    transport = creds["transport"]
+
+    start = time.time()
+
+    # Example package action — replace with controlled command builder
+    ps_script = f"""
+    Write-Output "Installing {job.software_name} {job.software_version or ''}"
+    """
+
+    session = winrm.Session(
+        target=host,
+        auth=(username, password),
+        transport=transport,
+        server_cert_validation="ignore"  # tighten for production certificate trust
+    )
+
+    response = session.run_ps(ps_script)
+    duration = round(time.time() - start, 2)
+
+    return ExecutionResult(
+        success=(response.status_code == 0),
+        exit_code=response.status_code,
+        stdout=response.std_out.decode(errors="ignore") if response.std_out else "",
+        stderr=response.std_err.decode(errors="ignore") if response.std_err else "",
+        duration_seconds=duration,
+        transport="winrm",
+    )
+
+Step D — Real Linux executor (Paramiko path)
+app/executors/linux_executor.py
+
+import time
+import paramiko
+
+from app.executors.result_models import ExecutionResult
+from app.services.credential_provider import get_linux_credentials
+
+
+def run_linux(job):
+    creds = get_linux_credentials()
+
+    host = job.target_host
+    username = creds["username"]
+    password = creds["password"]
+    private_key_path = creds["private_key_path"]
+
+    start = time.time()
+
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    # For production, prefer known_hosts / explicit host keys.
+    # Do NOT switch to AutoAddPolicy unless explicitly accepted for controlled environments.
+
+    connect_kwargs = {
+        "hostname": host,
+        "username": username,
+        "timeout": job.timeout_seconds or 300,
+    }
+
+    if private_key_path:
+        key = paramiko.RSAKey.from_private_key_file(private_key_path)
+        connect_kwargs["pkey"] = key
+    else:
+        connect_kwargs["password"] = password
+
+    client.connect(**connect_kwargs)
+
+    command = f"echo Installing {job.software_name} {job.software_version or ''}"
+    stdin, stdout, stderr = client.exec_command(command)
+
+    exit_code = stdout.channel.recv_exit_status()
+    out = stdout.read().decode(errors="ignore")
+    err = stderr.read().decode(errors="ignore")
+
+    client.close()
+
+    duration = round(time.time() - start, 2)
+
+    return ExecutionResult(
+        success=(exit_code == 0),
+        exit_code=exit_code,
+        stdout=out,
+        stderr=err,
+        duration_seconds=duration,
+        transport="ssh",
+    )
+
+Why this direction
+Paramiko documents the high-level pattern of SSHClient, load_system_host_keys(), connect(...), and exec_command(...), and it documents host-key handling instead of treating unknown hosts as trusted by default
+
+Step E — Update execution service to use ExecutionResult
+app/services/execution_service.py
+Recommended logic:
+
+dispatch to correct executor
+write execution result to job_steps
+persist stdout/stderr summary and exit code
+move to VERIFYING
+decide success/failure based on success and verification result
+
+Then in process_job(job_id):
+
+RUNNING
+call execute_job(job)
+append step with exit_code/stdout/stderr/duration
+VERIFYING
+verification decision
+SUCCESS or FAILED
+
+
+-----------------------
+
+Production test strategy
+1. Controlled lab validation
+Before touching wider infrastructure:
+
+one Windows test VM
+one Linux test VM
+controlled test accounts
+narrow firewall rules
+
+2. Windows test cases
+
+successful command execution
+bad credentials
+unreachable host
+invalid command
+timeout
+non-zero exit command
+verify installed package state
+
+pywinrm examples explicitly show remote command execution and PowerShell execution returning status code/stdout/stderr, which fits your result model well.
+
+3. Linux test cases
+
+password auth success
+private key auth success
+host key mismatch
+unreachable host
+permission denied
+command timeout
+non-zero exit command
+
+Paramiko explicitly documents host key loading and connection/authentication flow, so this should remain part of your test plan rather than being bypassed
+
+Operational features I recommend now (before Key Vault)
+1. Execution policy file
+Add an allowlist mapper:
+
+APPROVED_PACKAGES = {
+    "windows": {
+        "7zip": "Install-Script-Or-Command"
+    },
+    "linux": {
+        "curl": "apt-get install -y curl"
+    }
+}
+
+2. Correlation IDs everywhere
+You already have trace_id. Keep propagating it into:
+
+executor logs
+queue logs
+remote command audit steps
+
+3. Per-transport health checks
+Suggestion:
+
+/api/v1/monitor/queue ✅ already done
+/api/v1/monitor/active-jobs ✅ already done
+add:
+
+/api/v1/monitor/executor-health/windows
+/api/v1/monitor/executor-health/linux
+
+
+
+These can run non-destructive probes later.
+
+4. Result truncation / retention policy
+For production critical workloads:
+
+do not store uncontrolled full stdout forever
+set limits for DB step payload
+retain full logs in file/central log sink if needed
+
+This is a recommendation from me for production hardening.
+
+Production readiness gate I would enforce before moving on
+Before Phase 3 / Key Vault, I would require:
+Functional
+
+Windows real execution works in lab
+Linux real execution works in lab
+per-job progress API shows real outputs
+queue monitoring API + active-jobs API stable
+
+Reliability
+
+retry logic tested
+timeout logic tested
+bad credentials tested
+unreachable host tested
+
+Security
+
+command allowlist in place
+no credentials hardcoded inside executors
+WinRM exposure controlled
+SSH host key verification not bypassed
+
+Observability
+
+stdout/stderr/exit code captured
+execution duration captured
+trace_id visible end-to-end
+
+
+My recommendation on sequence from here
+Immediate next build order
+
+result_models.py
+credential_provider.py
+real windows_executor.py
+real linux_executor.py
+update execution_service.py
+test lab Windows
+test lab Linux
+add verification logic
+then Phase 3 Key Vault swap-in
+
+
+My recommendation on security posture
+Even though you want to postpone Phase 3, I would not promote real execution outside a controlled lab until credentials are abstracted cleanly. That does not mean you must finish Azure Key Vault first — but it does mean you should avoid wiring secrets directly inside executor code.
+That recommendation is consistent with the internal execution/vault path shown in mcp_servers_diagram and with the secure design / secure integration / cryptography / log management emphasis in ARB_HLD_TEMPLATE _Autonomous_IT_Operations_Toolkit_for_Cog_IT_v0.4. [mcp_servers_diagram | HTML], [ARB_HLD_TE...og_IT_v0.4 | Word]
+
+Bottom line
+You are ready to move from mock execution to real remote execution, but for an enterprise-grade path I recommend:
+
+WinRM/PowerShell over a controlled Windows remoting setup
+SSH with host key verification on Linux
+command allowlist
+result object model
+credential abstraction now
+Key Vault integration next
+keep queue/lifecycle/monitoring exactly as they are
+
+If you want, I can now do the next step in the same style as before:
+Option A
+Provide full file-by-file production code for:
+
+credential_provider.py
+result_models.py
+real windows_executor.py
+real linux_executor.py
+updated execution_service.py
+
+Option B
+Create two fresh Word documents:
+
+Real execution production architecture and rollout plan
+File-by-file implementation guide with code and test commands
+
+I can do either immediately.
+Provide your feedback on BizChatSourcesProvide full production code for executors and services
+
+
+1) Real execution production architecture and rollout plan
+👉 Download the architecture and rollout plan
+What’s inside
+
+production-grade control-plane vs execution-plane architecture
+Windows WinRM / PowerShell and Linux SSH execution design
+command allowlist / policy pattern
+credential abstraction strategy
+rollout stages from lab hardening to pilot deployment
+production readiness and security considerations
+
+ 2) File-by-file implementation guide with code and test commands
+👉 Download the file-by-file implementation guide
+What’s inside
+
+new / updated files to add
+code skeletons for:
+
+credential_provider.py
+execution_policy.py
+result_models.py
+real windows_executor.py
+real linux_executor.py
+updated execution_service.py
+
+
+PowerShell test commands
+rollout guardrails and validation sequence
+
+
+📄 3) Updated master context document
+👉 Download the updated master context
+What’s inside
+
+detailed continuity context for future conversations
+Phase 1 completed summary
+Phase 2 completed summary
+Phase 2B enterprise enhancements implemented
+Phase 2C real execution production hardening planned next
+placeholders for:
+
+Phase 3 – Azure Key Vault
+Phase 4 – SOP + AI
+Phase 5 – MCP / tool abstraction
+
+
+current APIs, current modules, and recommended next working order
+
+Recommended usage order-----------------------
+To keep your future work smooth, I’d use them like this:
+
+Read the updated master context first → this becomes your future continuity document. [CodeInterpreter | Undefined]
+Use the production architecture plan → this gives the big-picture design and rollout approach for real execution. [CodeInterpreter | Undefined]
+Use the file-by-file implementation guide while coding → this is the actionable build reference. [CodeInterpreter | Undefined]
+
+
+My recommendation for the next working step
+Now that Phase 1 and Phase 2 foundations are stable and documented, the strongest next move is:
+Phase 2C – controlled lab integration of real transport
+
+one Windows test VM using WinRM / PowerShell
+one Linux test VM using SSH
+command mapping / allowlist first
+credential abstraction in place before switching to Azure Key Vault later
+
+That keeps your current queue + worker + lifecycle + progress APIs intact while moving the executors from mock → real.
+If you want, next I can start with the actual file-by-file production code implementation for:
+
+credential_provider.py
+execution_policy.py
+result_models.py
+real windows_executor.py
+real linux_executor.py
+updated execution_service.py
+
+and we can build Phase 2C step by step.

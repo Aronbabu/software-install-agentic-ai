@@ -1,0 +1,16 @@
+uvicorn app.main:app --reload //try with without --reload to check for any issues
+http://127.0.0.1:8000/  http://0.0.0.0:8000
+
+
+FastAPI Docs: http://localhost:8000/docs
+Flower: http://localhost:5555
+redis://localhost:6379/
+
+docker exec -it software-install-api sh
+
+python -c "import os; print(os.getenv('POSTGRES_HOST'))"
+python -c "from app.config import settings; print(settings.get_database_url)"
+postgresql+psycopg2://postgres:postgres@postgres:5432/software_install
+
+
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/health" -Method Get

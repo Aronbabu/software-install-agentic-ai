@@ -1,0 +1,236 @@
+FastAPI (8000)
+      |
+      |
+MCP Gateway (8001)
+      |
+ -------------------------
+ |                       |
+Windows MCP         Linux MCP
+Server (9001)       Server (9002)
+ |                       |
+ |                       |
+OpenSSH / WinRM          SSH
+ 22|WinRM (5985/5986)      22                 |
+ |                       |
+Target Windows      Target Linux
+Servers             Servers
+---------
+For POC (Recommended)
+
+Developer Machine
+│
+├── FastAPI Server (8000)
+│
+├── Windows MCP Server (9001)
+│     │
+│     └── Windows Test Server
+│           ├── SSH 22
+│           └── WinRM 5985/5986
+│
+├── Linux MCP Server (9002)
+│     (Docker Container)
+│
+└── Ubuntu Test Container
+      └── SSH 22
+
+``Developer Machine
+│
+├── FastAPI (8000)
+│
+├── Linux MCP Server (9002)
+│     (Docker Container)
+│
+└── Ubuntu Target
+      (Docker Container)
+      SSH 22
+---
+Developer Machine
+│
+├── FastAPI (8000)
+│
+├── MCP Gateway (8001)
+│     (Docker Container)
+│
+├── Linux MCP Server (9002)
+│     (Docker Container)
+│
+└── Ubuntu Target
+      (Docker Container)
+      SSH 22
+
+poc3:
+Developer Machine
+│
+├── FastAPI (8000)
+│
+├── Windows MCP Server (9001)
+│
+└── Windows Test Server
+      SSH 22
+      WinRM 5985
+
+-----
+                    FastAPI
+                       |
+                MCP Gateway Pool
+                       |
+      ------------------------------------
+      |                |                 |
+   India            US              Europe
+      |                |                 |
+   MCP Pool        MCP Pool         MCP Pool
+      |                |                 |
+Windows/Linux    Windows/Linux    Windows/Linux
+      |                |                 |
+Target Servers   Target Servers   Target Servers
+
+Your future Linux MCP tools
+install_linux_package
+verify_linux_installation
+uninstall_linux_package
+get_linux_software_inventory
+
+add mcp registry:
+mcp_server_name
+platform
+region
+status
+endpoint
+last_heartbeat
+
+FastAPI
+    |
+MCP Gateway
+    |
+Windows MCP Server
+Linux MCP Server
+
+------
+Mandatory
+Python 3.11+
+FastAPI
+uvicorn
+pydantic
+requests
+httpx
+Recommended
+Docker Desktop
+VS Code
+Postman
+
+Status:
+
+✅ Already available in your environment
+-------
+Stream 2: Windows MCP Server
+
+Your architecture states:
+
+OpenSSH Primary
+WinRM Fallback
+PowerShell support
+Tool execution support
+
+Since OpenSSH is already tested
+Get-Service sshd
+PowerShell 7 is recommended in the architecture
+
+------------
+
+packages
+
+winget list
+choco -?
+install_windows_package
+uninstall_windows_package
+verify_windows_installation
+
+will likely leverage Winget or Chocolatey.
+-------
+Stream 3: Linux MCP Server
+Need at least one Linux VM.
+ssh user@linuxserver
+check ssh
+which apt
+which yum
+which dnf
+
+
+---------
+Stream 4: MCP Gateway Foundation
+
+reserv 8001 port
+
+FastAPI Main API      : 8000
+MCP Gateway           : 8001
+Windows MCP Server    : 9001
+Linux MCP Server      : 9002
+
+-----------
+Stream 5: Tool Contract Standard
+
+Your guide mentions:
+
+MCP tool contract standard
+
+Before coding define one JSON schema.
+
+{
+  "tool_name": "install_windows_package",
+  "server_type": "windows",
+  "target_host": "server01",
+  "inputs": {
+    "package_name": "7zip"
+  }
+}
+
+Stream 6: Entra ID for MCP
+User.Read
+openid
+profile
+email
+offline_access
+
+✅ 9. Authentication & Authorization Alignment
+
+Current architecture decision:
+
+Authentication
+
+Entra ID SSO
+Local Application Login
+
+Authorization
+
+Application Managed RBAC
+Application Managed Groups
+Application Managed Permissions
+
+Azure AD Groups are not required for MVP.
+-----------
+Stream 7: MCP Tool Registry Design
+our gateway responsibilities include:
+
+Tool Discovery
+Tool Registration
+Tool Routing
+
+eg
+Tool Name
+Version
+Platform
+Connection Method
+Status
+Endpoint
+future table:
+mcp_tools
+
+Stream 8: Windows MCP Proof-of-Concept (Important)
+
+FastAPI
+    |
+Windows MCP Client
+    |
+OpenSSH
+    |
+Execute PowerShell

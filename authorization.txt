@@ -1,0 +1,10 @@
+app roles missed
+
+python -m app.db.init_db
+
+or 
+insert into app_roles(role_name)
+values
+('Admin'),
+('Operator'),
+('Viewer');

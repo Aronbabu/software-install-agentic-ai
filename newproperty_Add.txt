@@ -1,0 +1,29 @@
+1. add in models.py
+2. add in schema.py
+3. generate alembic version and make upgrade
+4. add in jobs. routes/jobs for the create job
+
+5. rebuild the containers
+6. check the postgress the new properties
+
+to add new property say port number or connection type.
+
+step1: for DB and jobs
+a. add in models
+b. run alembic add and upgrade
+c. add in \route\jobs
+d. verify the db
+
+
+Step2: for API
+a. add in schema
+b. verfy the routes\jobs
+c. verify the jobs api url under swagger url
+
+
+To add portal
+
+a.api section
+b. page layouts
+c. pages
+d. routes

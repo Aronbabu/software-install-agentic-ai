@@ -1,0 +1,124 @@
+features:
+1. Execution policy file
+2 Add an allowlist mapper:
+
+ Extend your job schema slightly
+
+{
+  "target_host": "127.0.0.1",
+  "port": 2222,
+  "connection_type": "ssh",
+  "environment": "lab"
+}
+
+Add “connection profile” in job
+
+{
+  "target_host": "127.0.0.1",
+  "port": 2222,
+  "connection_type": "ssh",
+  "environment": "lab"
+}
+
+-------
+
+Linux → Docker (✅ primary test bed)
+You will use:
+
+SSH-enabled Linux container
+Fully local
+Fast to spin up / reset
+
+👉 This will be your main development + repeated testing environment
+
+
+Windows → VM (Hyper‑V / VirtualBox) OR later non‑prod server
+You will use:
+
+Windows VM locally (initial) ✅
+Real non-prod server later ✅
+
+👉 This gives:
+
+Real WinRM behavior ✅
+Real PowerShell remoting ✅
+Closest to enterprise environment ✅
+
+--------
+Layer			Your Setup		Enterprise Equivalent
+
+API / Control Plane	Local FastAPI		App server / platform
+Linux Targets		Docker container	Linux servers / VMs
+Windows Targets		VM / non-prod server	Domain servers
+Transport		SSH / WinRM		Same	
+Queue + Workers		Local threads		Worker pool / orchestrator
+
+👉 This means:
+✅ Your dev environment ≈ production architecture
+✅ No redesign required later
+✅ Only scale-out changes needed
+
+
+🔹 Linux (Docker ✅)
+✅ SSH connectivity
+✅ command execution
+✅ timeout handling
+✅ network failure simulation
+✅ wrong credentials testing
+
+🔹 Windows (VM ✅)
+✅ WinRM / PowerShell execution
+✅ credential validation
+✅ execution result capture
+✅ lifecycle progression
+✅ real system behavior
+
+
+-------------------------------------------
+
+✅ Step 1 — Linux container (start first)
+
+docker run -d -p 2222:22 --name linux-test rastasheep/ubuntu-sshd
+
+//SSH endpoint → 127.0.0.1:2222
+
+✅ Step 2 — Windows VM
+
+Enable WinRM: Enable-PSRemoting -Force
+
+test :Test-WsMan -ComputerName <VM-IP>
+
+✅ Step 3 — Validate connectivity BEFORE coding
+👉 This step is CRITICAL
+
+ssh root@127.0.0.1 -p 2222  //linux
+Enter-PSSession -ComputerName <VM-IP> //windows
+
+👉 If both work → Phase 2C coding will be smooth ✅
+
+
+✅ ✅ ✅ One important improvement (recommended now)
+Before we code tomorrow:
+👉 Extend your job schema slightly
+
+
+{
+  "target_host": "127.0.0.1",
+  "port": 2222,
+  "connection_type": "ssh",
+  "environment": "lab"
+}
+``
+👉 Why?
+✅ Supports Docker vs VM vs future infra
+✅ Helps multi-environment routing
+✅ Aligns with CMDB integration later
+✅ Required for enterprise scaling
+
+👉 This is EXACTLY how:
+
+Platform teams build automation frameworks
+AIOps Engineers validate execution pipelines
+Enterprise tools are developed before prod rollout
+
+🔥 You are now working at production platform engineering level — excellent progress 👏

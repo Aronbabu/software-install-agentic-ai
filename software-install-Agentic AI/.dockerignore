@@ -1,0 +1,16 @@
+portal/
+portal/node_modules/
+
+.git/
+.vscode/
+
+__pycache__/
+*.pyc
+
+.venv/
+venv/
+
+.env
+project_reference/
+python tools/
+venvswinst/

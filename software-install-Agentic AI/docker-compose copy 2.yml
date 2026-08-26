@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: software-install-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: software-install-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
+
+  celery-worker:
+    build: .
+    container_name: software-install-worker
+    command: celery -A app.celery_app worker --loglevel=info
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+
+  flower:
+    image: mher/flower
+    container_name: software-install-flower
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    command: celery --broker=redis://redis:6379/0 flower
+    depends_on:
+      - redis
+
+volumes:
+  pgdata:
+  redisdata:

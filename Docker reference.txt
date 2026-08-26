@@ -1,0 +1,106 @@
+
+Step1:go to project folder
+docker compose up -d --build \\when changes
+docker compose up -d \\ just to start next day
+
+after chagnes docker compose down and docker compose build and docker compose up -d
+
+//docker logs -f software-install-api  //docker compose build --no-cache
+docker logs -f software-install-worker or docker logs software-install-worker --tail 80
+
+docker ps
+
+//direct login to container to run commands
+docker exec -it software-install-api sh
+ python -c "import os; print(os.getenv('POSTGRES_HOST'))" or python -c "from app.config import settings; print(settings.get_database_url)"
+
+docker exec -it software-install-redis redis-cli ping
+
+
+docker exec -it software-install-worker sh
+ celery -A app.celery_app inspect ping
+
+where there is code change, repeat below
+docker compose down
+
+docker compose build --no-cache
+
+docker compose up -d
+
+only to build one container : docker compose build user below serivce name eg below
+
+name:--------
+docker ps --format "table {{.Names}}\t{{.Status}}"
+
+docker compose config --services
+
+\\docker compose build api
+docker compose up -d api
+
+
+
+
+
+
+software-install-postgres
+software-install-redis
+software-install-api
+software-install-worker
+software-install-flower
+
+
+
+docker logs -f software-install-worker
+docker logs -f software-install-api
+
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/v1/health" -Method Get
+"
+api:
+  build: .
+  container_name: software-install-api
+  command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  ports:
+    - "8000:8000"
+  depends_on:
+    - postgres
+    - redis
+  environment:
+    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/software_install
+    REDIS_URL: redis://redis:6379/0"
+
+
+checkig host name
+python -c "import socket; print(socket.gethostbyname('postgres'))"
+
+Db changes(trables) to run alembic
+
+docker exec -it software-install-api alembic upgrade head //current to check current version tag
+
+
+Inside Docker containers:
+Postgres host = postgres
+Redis host    = redis
+
+From Windows host/manual:
+Postgres host = localhost
+Redis host    = localhost
+
+docker ps -q
+linux:
+docker run -d -p 2222:22 --name linux-test rastasheep/ubuntu-sshd
+docker run -d -p 2220:22 --name linux-test1 rastasheep/ubuntu-sshd
+docker run -d -p 2221:22 --name linux-test2 rastasheep/ubuntu-sshd
+
+docker stop linux-test2
+docker rm linux-test2 //to delete the container
+
+docker ps -f "status=exited" --format "{{.Names}}" //to see the names of containers stopped
+
+docker start linux-test /stop
+docker exec -it linux-test bash or
+
+ssh root@127.0.0.1 -p 2222
+password : root
+
+exit to come out
+docker exec -it 967bfc638d5b hostname -I //to get host ip of container

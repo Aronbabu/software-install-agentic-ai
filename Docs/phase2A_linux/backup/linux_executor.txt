@@ -1,0 +1,58 @@
+import time
+import paramiko
+
+from app.executors.result_models import ExecutionResult
+from app.services.credential_provider import get_linux_credentials
+from app.services.execution_policy import get_execution_command
+
+
+def run_linux(job):
+    creds = get_linux_credentials()
+
+    host = job.target_host
+    username = creds["username"]
+    password = creds["password"]
+    port = creds["port"]
+    private_key_path = creds["private_key_path"]
+
+    command = get_execution_command("linux", job.software_name, job.software_version)
+
+    start = time.time()
+
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    connect_kwargs = {
+        "hostname": host,
+        "port": port,
+        "username": username,
+        "timeout": job.timeout_seconds or 300,
+    }
+
+    if private_key_path:
+        key = paramiko.RSAKey.from_private_key_file(private_key_path)
+        connect_kwargs["pkey"] = key
+    else:
+        connect_kwargs["password"] = password
+
+    client.connect(**connect_kwargs)
+
+    stdin, stdout, stderr = client.exec_command(command)
+
+    exit_code = stdout.channel.recv_exit_status()
+    out = stdout.read().decode(errors="ignore")
+    err = stderr.read().decode(errors="ignore")
+
+    client.close()
+
+    duration = round(time.time() - start, 2)
+
+    return ExecutionResult(
+        success=(exit_code == 0),
+        exit_code=exit_code,
+        stdout=out,
+        stderr=err,
+        duration_seconds=duration,
+        transport="ssh",
+    )
+

@@ -1,0 +1,26 @@
+Phase 2A — Executor Framework (Next Step)
+executors/
+  base_executor.py
+  windows_executor.py
+  linux_executor.py
+  executor_factory.py
+
+Phase 2B — Windows Execution (Controlled)
+
+Fix NTLM username issue
+Use .env credentials
+Test WinRM execution
+
+
+Phase 2C — Linux Execution
+
+SSH executor
+paramiko / subprocess
+same lifecycle integration
+
+
+Phase 2D — Stability
+
+retry logic (fully wired)
+timeout handling
+safe failure patterns

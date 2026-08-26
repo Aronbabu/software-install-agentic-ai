@@ -1,0 +1,5 @@
+dpage/pgadmin4:latest
+
+docker login
+
+docker compose up -d

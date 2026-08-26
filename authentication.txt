@@ -1,0 +1,147 @@
+Authentication
+    • Microsoft Entra ID SSO
+    • Local Application Authentication
+
+Authorization
+    • Application Managed RBAC
+    • Application Managed Groups
+    • Application Managed Permissions
+
+
+--Step 1 – Database Models
+create
+app_users
+app_roles
+app_user_roles
+authorization_decisions
+
+App users:
+id
+username
+email
+auth_type
+active
+created_at
+updated_at
+
+App roles:
+id
+role_name
+
+Admin
+Operator
+Viewer
+
+app_user_roles
+
+id
+user_id
+role_id
+
+authorization_decisions:
+id
+job_id
+user_id
+
+target_host
+connection_method
+
+action
+
+decision
+reason
+
+created_at
+
+Step 2 – SQLAlchemy Models
+
+Create:app/models/security.py
+AppUser
+AppRole
+AppUserRole
+AuthorizationDecision
+
+Step 3 – Alembic Migration
+
+Generate migration: alembic revision --autogenerate -m "authorization foundation"
+
+alembic upgrade head
+
+Step 4 – Authorization Service
+app/services/authorization_service.py
+
+authorize_execution()
+
+get_user_roles()
+
+check_permission()
+
+record_decision()
+
+decision = authorize_execution(
+    user,
+    action,
+    target_host
+)
+
+result
+ALLOW
+DENY
+``
+
+new
+Create Job
+↓
+Authorization Check
+↓
+ALLOW
+↓
+Execute
+
+admin:
+Can approve everything
+Can manage catalog
+Can manage users
+Can execute
+
+Operator:
+Can execute approved software
+Can view jobs
+Can view audit
+
+reader:
+Can execute approved software
+Can view jobs
+Can view audit
+
+authorize(
+    user,
+    source,
+    action,
+    target,
+    software
+)
+``
+User: John
+Source: ServiceNow
+Action: Install
+Target: Linux001
+Software: curl
+``
+
+request_source
+request_reference
+request_source = SERVICENOW
+request_reference = RITM9000207
+
+request_source = ADMIN_PORTAL
+request_reference = MANUAL-001
+
+------------
+ServiceNow Requests
+Admin Portal Requests
+AI Assist Requests
+Future API Requests
+
+ alembic revision --autogenerate -m "authorization foundation and request source"
+alembic upgrade head

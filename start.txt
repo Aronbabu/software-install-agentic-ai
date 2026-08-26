@@ -1,0 +1,142 @@
+http://localhost:8000/docs
+
+flower
+http://localhost:5555
+
+redis connectivity
+docker exec -it software-install-api bash
+
+"
+python -c "
+from app.celery_app import celery_app
+print(celery_app.control.inspect().ping())
+"
+
+"
+output: {'ok': 'pong'}}
+
+
+docker network ls
+
+
+ssh root@127.0.0.1 -p 2222
+
+to know all ports:
+docker ps --format "table {{.Names}}\t{{.Ports}}" or docker port linux-test1
+
+to get internal ip:
+docker inspect linux-test1 | findstr IPAddress
+for detgails :docker inspect linux-test1
+
+alembic revision --autogenerate -m "add_target_port"
+
+any changes
+
+docker compose down
+
+docker compose build --no-cache
+docker compose up -d
+``
+http://localhost:8000/docs
+POST /api/v1/jobs expand
+
+in db, postgress
+
+select target_port,
+       connection_method
+from jobs
+limit 1;
+
+--
+docker logs -f software-install-worker
+
+
+{
+  "ticket_id":"RITM9000202",
+  "target_host":"host.docker.internal",
+  "target_port":2222,
+  "connection_method":"openssh",
+  "os_type":"linux",
+  "software_name":"vim",
+  "software_version":"latest",
+  "requested_by":"aronbabu",
+  "max_retries":3,
+  "timeout_seconds":300,
+  "execution_mode":"immediate"
+}
+
+docker exec -it software-install-api bash
+
+alembic upgrade head
+
+alembic history
+alembic current
+ls -lrt alembic/versions
+
+docker exec -it software-install-postgres psql -U postgres
+
+C:\Users\458027\OneDrive - Cognizant\D Drive\Learn\AIOps_HCS\Phase 2\software-install-Agentic AI
+docker compose down
+
+docker compose build --no-cache
+
+docker compose up -d
+
+check 
+`
+
+new 
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000204"
+      target_host      = "host.docker.internal"
+      target_port      = 2221
+      connection_method= "openssh"
+      os_type          = "linux"
+      software_name    = "vim"
+      software_version = "latest"
+      requested_by     = "aronbabu"
+      justification    = "Linux Test2 git install"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+manually appluy if alembic alerady ran
+docker exec -it software-install-postgres psql -U postgres -d software_install
+
+ALTER TABLE jobs
+ADD COLUMN target_port INTEGER NOT NULL DEFAULT 22;
+
+ALTER TABLE jobs
+ADD COLUMN connection_method VARCHAR(20)
+NOT NULL DEFAULT 'openssh';
+
+clean method:
+UPDATE alembic_version
+SET version_num='8b43761452f3';
+alembic upgrade head
+
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)" `
+  -Method Get
+
+monitor in container: docker logs -f software-install-worker
+
+for failure analysis: from db
+SELECT
+id,
+target_host,
+target_port,
+connection_method
+FROM jobs
+WHERE ticket_id='RITM9000204';

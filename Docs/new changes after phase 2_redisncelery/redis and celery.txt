@@ -1,0 +1,132 @@
+existing:
+ServiceNow
+    ↓
+FastAPI
+    ↓
+PostgreSQL
+    ↓
+In-Memory Queue
+    ↓
+Worker Threads
+    ↓
+Executors
+--------------------
+Phase 2.5 Architecture:
+
+ServiceNow
+      ↓
+FastAPI
+      ↓
+PostgreSQL
+      ↓
+Redis
+      ↓
+Celery Workers
+      ↓
+Windows/Linux Executors
+
+------------------------------------
+Production Risks
+Risk 1 — Queue Lost on Restart
+Current queue lives inside application memory.
+If server restarts:
+Queued Jobs
+     ❌ Lost
+
+Risk 2 — Multiple FastAPI Instances
+Suppose tomorrow you deploy:
+Pod 1
+Pod 2
+Pod 3
+Each instance gets:
+_job_queue
+_active_jobs
+_workers
+
+Pod-1 queue != Pod-2 queue
+Not scalable.
+
+Risk 3 — No Durable Retry
+Queue + Retry = memory
+Server restart means:
+retry state may disappear
+
+Risk 4 — No Horizontal Scaling
+Today:
+1 API
+1 Worker Process
+
+Tomorrow:
+100 RITMs
+1000 RITMs
+
+Worker threads become bottleneck.
+------------------------------------
+Why Redis + Celery?
+current usecase
+Software Installations
+Remote Execution
+Long Running Tasks
+Retries
+Scheduling
+
+Celery fits extremely well.
+Benefits
+✅ Durable queues
+✅ Distributed workers
+✅ Native retries
+✅ Native delayed jobs
+✅ Scheduled execution support
+✅ Horizontal scaling
+✅ Monitoring ecosystem
+
+Current Feature	Celery Equivalent
+Worker threads	Celery Worker
+enqueue_job()	task.delay()
+scheduled jobs	Celery ETA/Countdown
+retries		Celery retry()
+monitor API	Flower / Prometheus
+active_jobs	Celery Inspect
+
+
+Recommended Enterprise Target Architecture
+I would evolve to:
+
+		ServiceNow
+                    │
+                    ▼
+               FastAPI APIs
+                    │
+                    ▼
+              PostgreSQL
+                    │
+                    ▼
+                 Redis
+                    │
+       ┌────────────┼─────────────┐
+       ▼            ▼             ▼
+ Celery Worker  Celery Worker  Celery Worker
+    Windows        Linux         Generic
+       │             │
+       ▼             ▼
+     WinRM          SSH
+
+
+What Should Stay As-Is
+You have already built valuable components that should remain:
+✅ Lifecycle engine (job_lifecycle.py) [cognizanto...epoint.com]
+✅ Execution service (execution_service.py) [cognizanto...epoint.com]
+✅ Executors (windows_executor.py, linux_executor.py) [cognizanto...epoint.com]
+✅ PostgreSQL job tracking [cognizanto...epoint.com]
+✅ Observability APIs [cognizanto...epoint.com]
+Only the queue implementation should change.
+
+master context
+
+Phase 1  Foundation
+Phase 2  Execution Engine
+Phase 2.5 Enterprise Orchestration (Redis/Celery)
+Phase 3  Security
+Phase 4  AI + SOP
+Phase 5  MCP
+Phase 6  ServiceNow

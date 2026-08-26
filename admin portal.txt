@@ -1,0 +1,16 @@
+create the 
+1.app/routes/dashboard.py
+2. main.py
+app.include_router(...)
+from app.routes.dashboard import router as dashboard_router
+
+app.include_router(dashboard_router)
+
+docker compose restart software-install-agenticai-api
+
+
+admin portal not connecting to fastapi,
+
+updated fastapi dashboard url in portal/client
+
+in fastapi main, added cores for portal urs npm added npm url as orignin in fastapi,  now it works
