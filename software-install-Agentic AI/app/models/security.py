@@ -238,3 +238,66 @@ class AuthorizationDecision(Base):
         nullable=False,
         default=datetime.utcnow,
     )
+
+# Add this new model to security.py
+
+class ServiceAccountCredential(Base):
+    """
+    API Keys for service-to-service authentication (e.g., ServiceNow)
+    """
+    __tablename__ = "service_account_credentials"
+
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    # Link to the service account user
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("app_users.id"),
+        nullable=False,
+    )
+
+    # Service name (e.g., "SERVICENOW", "EXTERNAL_API", etc.)
+    service_name = Column(
+        String(100),
+        nullable=False,
+    )
+
+    # The actual API key (hashed in production - for MVP store plaintext)
+    api_key = Column(
+        String(255),
+        nullable=False,
+        unique=True,
+    )
+
+    # Active/Inactive
+    active = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+    )
+
+    # Metadata
+    description = Column(
+        String(500),
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
+    )
+
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
+    )
+
+    user = relationship("AppUser")

@@ -50,6 +50,12 @@ APPROVED_PACKAGES = {
 
             "verify": "which vim"
         },
+         "git": {
+        "install":
+            "DEBIAN_FRONTEND=noninteractive apt-get update && "
+            "DEBIAN_FRONTEND=noninteractive apt-get install -y git",
+        "verify": "git --version"
+    },
         "python3": {
             "install":"...",
             "verify":"python3 --version",

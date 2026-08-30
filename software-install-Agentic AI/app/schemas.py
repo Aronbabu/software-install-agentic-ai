@@ -1,29 +1,50 @@
+
 from datetime import datetime
 from typing import Optional, List, Literal
 from pydantic import BaseModel, Field
 from app.models.job import JobStatus
 
 class JobCreate(BaseModel):
+    # =====================================================
+    # CORE JOB FIELDS
+    # =====================================================
     ticket_id: str = Field(..., description="Ticket or RITM number")
     target_host: str
-    target_port: int = 22
-    connection_method: str = "openssh"
-    os_type: str
+    target_port: int = Field(default=22, description="SSH port")
+    connection_method: str = Field(default="openssh", description="openssh or winrm")
+    os_type: str = Field(..., description="linux or windows")
     software_name: str
     software_version: Optional[str] = None
-    requested_by: Optional[str] = None
-    justification: Optional[str] = None
-    max_retries: Optional[int] = 3
-    timeout_seconds: Optional[int] = 300
+    
+    # =====================================================
+    # REQUEST METADATA
+    # =====================================================
     request_source: Literal[
         "ADMIN_PORTAL",
         "SERVICENOW",
         "AI_ASSIST",
         "API",
     ] = "ADMIN_PORTAL"
-    request_reference: Optional[str] = None
-
-    # workflow-ready placeholders
+    
+    request_reference: Optional[str] = Field(
+        None, 
+        description="ServiceNow RITM/request number or external reference"
+    )
+    
+    # For Portal requests: who is requesting
+    # For ServiceNow: optional, will default to "servicenow_svc"
+    requested_by: Optional[str] = Field(
+        None,
+        description="Username requesting the job (portal) or service account (servicenow)"
+    )
+    
+    justification: Optional[str] = None
+    
+    # =====================================================
+    # EXECUTION OPTIONS
+    # =====================================================
+    max_retries: Optional[int] = 3
+    timeout_seconds: Optional[int] = 300
     execution_mode: Optional[str] = "immediate"   # immediate / scheduled
     scheduled_time: Optional[datetime] = None
 
