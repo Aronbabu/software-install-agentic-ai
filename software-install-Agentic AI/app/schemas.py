@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Literal
 from pydantic import BaseModel, Field
 from app.models.job import JobStatus
 
@@ -15,8 +15,15 @@ class JobCreate(BaseModel):
     justification: Optional[str] = None
     max_retries: Optional[int] = 3
     timeout_seconds: Optional[int] = 300
-    
- # workflow-ready placeholders
+    request_source: Literal[
+        "ADMIN_PORTAL",
+        "SERVICENOW",
+        "AI_ASSIST",
+        "API",
+    ] = "ADMIN_PORTAL"
+    request_reference: Optional[str] = None
+
+    # workflow-ready placeholders
     execution_mode: Optional[str] = "immediate"   # immediate / scheduled
     scheduled_time: Optional[datetime] = None
 
@@ -34,8 +41,8 @@ class JobStepResponse(BaseModel):
     exit_code: Optional[int] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    # pydantic v2: allow parsing from ORM/attribute objects
+    model_config = {"from_attributes": True}
 
 
 class JobResponse(BaseModel):
@@ -54,16 +61,20 @@ class JobResponse(BaseModel):
     trace_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    steps: List[JobStepResponse] = []
+    steps: List[JobStepResponse] = Field(default_factory=list)
+    request_source: str
+    request_reference: Optional[str] = None
+    execution_mode: Optional[str] = None
+    
 
-    class Config:
-        from_attributes = True
+    # pydantic v2: allow parsing from ORM/attribute objects
+    model_config = {"from_attributes": True}
 
 class JobListResponse(BaseModel):
     items: List[JobResponse]
     total: int
 
-#optional health check response model
+# optional health check response model
 class HealthResponse(BaseModel):
     status: str
     app: str
@@ -78,4 +89,4 @@ class JobProgressResponse(BaseModel):
     job_id: str
     status: JobStatus
     trace_id: Optional[str] = None
-    steps: list
+    steps: List[JobStepResponse] = Field(default_factory=list)

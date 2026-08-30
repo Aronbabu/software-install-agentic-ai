@@ -1,5 +1,6 @@
 from datetime import datetime
 import uuid
+import sqlalchemy as sa
 
 from sqlalchemy import (
     Column,
@@ -24,9 +25,10 @@ class AppUser(Base):
     __tablename__ = "app_users"
 
     id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    UUID(as_uuid=True),
+    primary_key=True,
+    default=uuid.uuid4,
+    server_default=sa.text("gen_random_uuid()")
     )
 
     username = Column(
@@ -57,13 +59,14 @@ class AppUser(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
     )
 
     updated_at = Column(
         DateTime,
         nullable=False,
         default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
     )
 
     roles = relationship(
@@ -100,6 +103,7 @@ class AppRole(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
     )
 
     user_roles = relationship(
@@ -137,6 +141,7 @@ class AppUserRole(Base):
         DateTime,
         nullable=False,
         default=datetime.utcnow,
+        server_default=sa.text("CURRENT_TIMESTAMP")
     )
 
     user = relationship(

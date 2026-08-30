@@ -1,20 +1,27 @@
 File,Extension,Size(KB),Last Modified
+.dockerignore,,0.14,2026-08-17 20:16:41
 .env,,0.46,2026-07-22 15:49:16
 .env.example,.example,0.19,2026-05-29 16:55:10
 alembic.ini,.ini,0.62,2026-06-01 14:47:55
+createfiest.py,.py,1.84,2026-08-17 18:01:05
 deliverables,,6.52,2026-08-10 11:27:31
 docker-compose copy 2.yml,.yml,1.04,2026-07-15 15:12:33
 docker-compose copy 3.yml,.yml,1.06,2026-07-21 18:52:03
 docker-compose copy.yml,.yml,0.7,2026-07-14 15:28:42
-docker-compose.yml,.yml,1.92,2026-07-29 15:14:01
+docker-compose.yml,.yml,2.07,2026-08-17 17:14:23
 docker-compose_redis.yml,.yml,0.58,2026-07-20 19:05:21
 docker-compose_updated.yml,.yml,1.69,2026-07-21 18:47:14
 Dockerfile,,0.22,2026-07-15 15:44:29
 fs2.txt,.txt,374.38,2026-07-15 11:06:51
+implementations.md,.md,0.81,2026-08-18 11:21:11
+portal_implementations.md,.md,1.08,2026-08-18 14:52:16
 README.md,.md,0.58,2026-07-31 14:58:26
 redistest.py,.py,0.12,2026-07-15 15:23:17
-requirements.txt,.txt,0.22,2026-07-15 12:42:40
-alembic\env.py,.py,1.4,2026-06-05 15:45:24
+ref,,3.67,2026-08-17 19:55:54
+requirements.txt,.txt,0.24,2026-08-19 12:54:32
+test.py,.py,0.56,2026-08-19 19:26:02
+test1.py,.py,0.11,2026-08-20 19:36:10
+alembic\env.py,.py,1.41,2026-08-20 17:47:40
 alembic\env1.py,.py,2.05,2026-06-05 15:48:08
 alembic\README,,0.04,2026-06-05 15:48:08
 alembic\script.py.mako,.mako,0.62,2026-06-05 15:48:08
@@ -22,13 +29,25 @@ app\celery_app.py,.py,0.67,2026-07-29 15:03:22
 app\config.py,.py,0.91,2026-07-21 19:31:56
 app\db.py,.py,0.52,2026-07-22 15:50:07
 app\logging_config.py,.py,0.25,2026-05-31 16:49:32
-app\main.py,.py,1.92,2026-07-21 18:41:35
+app\main.py,.py,2.29,2026-08-18 15:49:54
 app\middleware.py,.py,0.88,2026-06-01 18:55:56
-app\models.py,.py,2.55,2026-06-23 19:18:10
-app\schemas.py,.py,1.87,2026-06-21 20:09:20
+app\schemas.py,.py,1.99,2026-08-20 17:47:40
 app\__init__.py,.py,0.0,2026-05-29 14:34:53
+entra-test\.env,,0.15,2026-08-19 12:46:37
+entra-test\app.py,.py,1.04,2026-08-19 12:58:11
+entra-test\requirements.txt,.txt,0.03,2026-08-19 12:54:23
+portal\.gitignore,,0.25,2026-08-17 18:30:36
+portal\eslint.config.js,.js,0.58,2026-08-17 18:35:22
+portal\index.html,.html,0.35,2026-08-17 18:35:22
+portal\package-lock.json,.json,137.92,2026-08-17 18:48:54
+portal\package.json,.json,0.91,2026-08-17 18:48:54
+portal\README.md,.md,2.37,2026-08-17 18:35:22
+portal\tsconfig.app.json,.json,0.64,2026-08-17 18:30:36
+portal\tsconfig.json,.json,0.12,2026-08-17 18:30:36
+portal\tsconfig.node.json,.json,0.54,2026-08-17 18:30:36
+portal\vite.config.ts,.ts,0.16,2026-08-17 18:30:36
 project_reference\Master_Context copy.md,.md,7.05,2026-07-20 18:17:35
-project_reference\Master_Context.md,.md,6.54,2026-08-17 10:54:49
+project_reference\Master_Context.md,.md,6.54,2026-08-17 16:00:50
 project_reference\Master_Context_ph2.md,.md,6.45,2026-07-14 14:38:20
 project_reference\master_context_updated.txt,.txt,6.12,2026-08-04 14:20:19
 project_reference\Milestones.txt,.txt,6.2,2026-08-08 11:44:18
@@ -38,34 +57,70 @@ project_reference\new_plans.md,.md,1.78,2026-08-06 17:40:26
 project_reference\new_project_scope.md,.md,8.48,2026-08-05 12:06:05
 project_reference\new_scope_highlevel.md,.md,1.8,2026-08-05 12:53:08
 project_reference\new_timeline.md,.md,7.44,2026-08-11 17:19:43
-project_reference\Project_File_Inventory.csv,.csv,3.24,2026-07-29 14:42:25
+project_reference\Project_File_Inventory.csv,.csv,4.3,2026-08-17 14:14:59
 project_reference\project_metadata.yaml,.yaml,0.39,2026-07-01 18:59:15
-project_reference\Project_Structure.md,.md,3.02,2026-08-17 14:14:53
+project_reference\Project_Structure.md,.md,5.4,2026-08-27 12:46:11
 project_reference\Project_Structure1.md,.md,1.64,2026-07-01 18:32:28
 project_reference\Project_Structure2.md,.md,2.23,2026-07-20 18:49:54
-project_reference\ref.txt,.txt,0.0,2026-08-04 14:24:09
+project_reference\Project_Structure_work.md,.md,2.05,2026-08-17 14:16:18
+project_reference\ref.txt,.txt,0.82,2026-08-18 11:36:51
 python tools\generate_project_structure.py,.py,3.45,2026-07-01 18:26:07
 python tools\project_reference\Project_File_Inventory.csv,.csv,0.16,2026-08-17 14:13:52
 python tools\project_reference\Project_Structure.md,.md,0.16,2026-08-17 14:13:52
 project_reference\fresh start\current_status.md,.md,0.79,2026-08-08 11:09:47
 project_reference\fresh start\master flow.md,.md,1.55,2026-08-07 19:23:51
 project_reference\fresh start\new_hybrid_mvp_full.md,.md,6.07,2026-08-11 17:19:43
-app\executors\linux_executor.py,.py,1.83,2026-06-23 16:27:48
+portal\public\favicon.svg,.svg,9.3,2026-08-17 18:30:36
+portal\public\icons.svg,.svg,4.91,2026-08-17 18:30:36
+portal\src\App.css,.css,2.82,2026-08-17 18:30:36
+portal\src\App.tsx,.tsx,0.17,2026-08-17 19:47:46
+portal\src\index.css,.css,2.14,2026-08-17 20:06:40
+portal\src\main.tsx,.tsx,0.22,2026-08-17 18:30:36
+portal\src\api\client.ts,.ts,0.13,2026-08-18 15:37:48
+portal\src\api\dashboardApi.ts,.ts,0.17,2026-08-18 17:49:48
+portal\src\api\jobDetailsApi.ts,.ts,0.37,2026-08-18 17:49:34
+portal\src\api\jobsApi.ts,.ts,0.14,2026-08-18 16:13:17
+portal\src\assets\hero.png,.png,12.75,2026-08-17 18:30:36
+portal\src\assets\react.svg,.svg,4.03,2026-08-17 18:30:36
+portal\src\assets\vite.svg,.svg,8.5,2026-08-17 18:30:36
+portal\src\pages\Dashboard.tsx,.tsx,1.75,2026-08-18 19:07:38
+portal\src\pages\JobDetails.tsx,.tsx,4.84,2026-08-18 18:50:16
+portal\src\pages\Jobs.tsx,.tsx,2.92,2026-08-18 18:57:50
+portal\src\routes\routes.tsx,.tsx,0.59,2026-08-18 17:40:29
+portal\src\types\dashboard.ts,.ts,0.15,2026-08-17 19:57:40
+portal\src\types\job.ts,.ts,0.43,2026-08-18 17:04:43
+portal\src\components\layout\AdminLayout.tsx,.tsx,0.56,2026-08-18 18:37:23
+portal\src\components\layout\Sidebar.tsx,.tsx,1.23,2026-08-18 18:36:28
+portal\src\components\layout\Topbar.tsx,.tsx,0.66,2026-08-18 18:37:15
+portal\src\components\status\StatusBadge.tsx,.tsx,0.59,2026-08-18 17:34:38
+app\db\base.py,.py,0.07,2026-08-20 17:20:04
+app\db\init_db.py,.py,1.14,2026-08-20 19:27:46
+app\db\session.py,.py,0.42,2026-08-20 17:46:50
+app\db\__init__.py,.py,0.09,2026-08-20 17:21:38
+app\executors\linux_executor.py,.py,2.84,2026-08-17 17:38:18
 app\executors\result_models.py,.py,0.28,2026-06-07 17:38:54
 app\executors\windows_executor.py,.py,2.16,2026-07-01 14:08:43
 app\executors\__init__.py,.py,0.0,2026-06-02 15:57:37
+app\models\audit.py,.py,0.8,2026-08-27 12:33:58
+app\models\job.py,.py,2.96,2026-08-20 17:36:32
+app\models\ledger.py,.py,0.0,2026-08-20 17:12:14
+app\models\security.py,.py,4.42,2026-08-20 17:22:12
+app\models\__init__.py,.py,0.12,2026-08-20 17:18:32
 app\queue\job_queue.py,.py,0.51,2026-07-29 15:31:39
 app\queue\job_queue1.py,.py,2.52,2026-07-29 15:17:00
 app\queue\__init__.py,.py,0.0,2026-06-05 10:39:54
-app\routes\jobs.py,.py,6.74,2026-07-29 15:27:41
+app\routes\dashboard.py,.py,0.97,2026-08-20 17:47:40
+app\routes\jobs.py,.py,7.5,2026-08-27 12:28:11
 app\routes\monitor_api.py,.py,1.95,2026-07-21 19:18:16
 app\routes\__init__.py,.py,0.0,2026-05-29 14:34:54
+app\services\audit_service.py,.py,0.52,2026-08-27 12:42:42
+app\services\authorization_service.py,.py,1.64,2026-08-20 19:34:18
 app\services\credential_provider.py,.py,0.5,2026-06-21 19:42:29
-app\services\execution_policy.py,.py,1.87,2026-07-29 19:10:32
-app\services\execution_service.py,.py,6.19,2026-07-21 19:20:19
-app\services\job_lifecycle.py,.py,1.66,2026-06-15 19:35:41
+app\services\execution_policy.py,.py,2.3,2026-08-17 17:41:01
+app\services\execution_service.py,.py,6.2,2026-08-20 17:47:40
+app\services\job_lifecycle.py,.py,1.66,2026-08-20 17:47:40
 app\services\__init__.py,.py,0.0,2026-06-02 11:04:30
-app\tasks\execution_tasks.py,.py,2.67,2026-07-29 15:04:59
+app\tasks\execution_tasks.py,.py,2.67,2026-08-20 17:47:40
 app\tasks\__init__.py,.py,0.0,2026-07-14 15:08:06
 app\workers\celery_worker.py,.py,0.27,2026-07-20 19:08:05
 alembic\versions\0001_create_jobs_and_job_steps.py,.py,2.53,2026-06-01 15:13:23
@@ -73,3 +128,5 @@ alembic\versions\0002_extend_job_status_lifecycle.py,.py,1.02,2026-06-02 11:51:2
 alembic\versions\003_add_execution_fields.py,.py,1.25,2026-06-05 16:23:49
 alembic\versions\004_add_workflow_ready_fields.py,.py,0.97,2026-06-15 18:29:32
 alembic\versions\005_add_final_failed_final_statu.py,.py,0.68,2026-06-23 18:52:51
+alembic\versions\006_add_target_port_connection_method.py,.py,0.79,2026-08-17 15:36:41
+alembic\versions\007_authorization_foundation_and_request_.py,.py,3.21,2026-08-20 19:24:11

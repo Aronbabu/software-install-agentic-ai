@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version="0.1.0",
-    description="Agentic AI Software Install Platform - Redis Celery Mode",
+    description="Agentic AI Software Install Platform",
     lifespan=lifespan
 )
 

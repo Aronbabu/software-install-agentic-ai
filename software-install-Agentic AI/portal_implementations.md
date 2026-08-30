@@ -7,7 +7,7 @@ typescript
 esline
 
 npm install axios react-router-dom recharts lucide-react @tanstack/react-table
-npm run dev
+npm run dev( \\go to cd portal)
 http://localhost:5173
 
 2nd terminal portal

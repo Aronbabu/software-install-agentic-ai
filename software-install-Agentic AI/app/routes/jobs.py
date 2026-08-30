@@ -8,17 +8,43 @@ from app.schemas import JobCreate, JobResponse,JobListResponse,JobStatusUpdate,E
 from datetime import datetime
 from app.services.job_lifecycle import update_job_status
 from app.services.execution_service import execute_job
-
 from app.tasks.execution_tasks import process_job_task
-
+from app.services.authorization_service import AuthorizationService
+from app.services.audit_service import AuditService
+from app.models.security import AppUser
+from datetime import datetime 
 
 logger = logging.getLogger("app.routes.jobs")
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
 
+
+def resolve_request_user(
+    db: Session,
+    requested_by: str,
+    ) -> AppUser:
+    user = (
+        db.query(AppUser)
+        .filter(
+            AppUser.username == requested_by,
+            AppUser.active.is_(True)
+        )
+        .first()
+    )
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                f"Active application user '{requested_by}' "
+                "was not found"
+            ),
+        )
+
+    return user
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_db)):
     trace_id = getattr(request.state, "trace_id", str(uuid.uuid4()))
+    user = resolve_request_user(db=db,requested_by=payload.requested_by,)
     job = Job(
         id=str(uuid.uuid4()), 
         ticket_id=payload.ticket_id,
@@ -42,12 +68,70 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         scheduled_time=payload.scheduled_time,
         target_port=payload.target_port,
         connection_method=payload.connection_method,
-
-
+        request_source=payload.request_source,
+        request_reference=payload.request_reference
     )
-
+    
     db.add(job)
     db.flush()
+    
+    # Insert authorization check here
+    allowed = AuthorizationService.authorize_execution(
+        db=db,
+        user_id=user.id,  # Ensure user_id is available in this scope
+        job_id=job.id,
+        request_source=job.request_source,
+        request_reference=job.request_reference,
+        action="EXECUTE",
+        target_host=job.target_host,
+        connection_method=job.connection_method,
+    )
+    if not allowed:
+        AuditService.record_event(
+            db=db,
+            event_type="AUTHORIZATION_DENIED",
+            request_source=job.request_source,
+            request_reference=job.request_reference,
+            job_id=job.id,
+            actor_id=user.id,
+            target_host=job.target_host,
+            connection_method=job.connection_method,
+            result="DENY",
+            message="Execution authorization was denied",
+        )
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Execution not authorized",
+        )
+    AuditService.record_event(
+        db=db,
+        event_type="JOB_CREATED",
+        request_source=job.request_source,
+        request_reference=job.request_reference,
+        job_id=job.id,
+        actor_id=user.id,
+        target_host=job.target_host,
+        connection_method=job.connection_method,
+        result="ALLOW",
+        message="Execution authorization was allowed",
+    )
+
+    AuditService.record_event(
+        db=db,
+        event_type="JOB_CREATED",
+        request_source=job.request_source,
+        request_reference=job.request_reference,
+        job_id=job.id,
+        actor_id=user.id,
+        target_host=job.target_host,
+        connection_method=job.connection_method,
+        result="CREATED",
+        message="Job created successfully",
+    )
+
+    db.commit()
+    db.refresh(job)
 
     initial_step = JobStep(
         job_id=job.id,
