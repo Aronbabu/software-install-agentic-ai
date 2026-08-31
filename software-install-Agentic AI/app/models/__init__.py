@@ -8,6 +8,7 @@ from .security import (
 )
 from .audit import AuditEvent
 from .ledger import DecisionLedger
+from app.models.catalogue import SoftwareCatalogue
 
 __all__ = [
     "Job",
@@ -18,4 +19,5 @@ __all__ = [
     "AuthorizationDecision",
     "AuditEvent",
     "DecisionLedger",
+    "SoftwareCatalogue",
 ]

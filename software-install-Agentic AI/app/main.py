@@ -11,6 +11,8 @@ from app.routes.jobs import router as jobs_router
 from app.routes.monitor_api import router1 as monitoring_router
 from app.routes.dashboard import router as dashboard_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes.ledger_api import router as ledger_router
+from app.routes.catalogue_api import router as catalogue_router
 
 
 
@@ -41,6 +43,8 @@ app.add_middleware(RequestContextMiddleware)
 app.include_router(jobs_router)
 app.include_router(monitoring_router)
 app.include_router(dashboard_router)
+app.include_router(ledger_router)
+app.include_router(catalogue_router)
 
 app.add_middleware(
     CORSMiddleware,

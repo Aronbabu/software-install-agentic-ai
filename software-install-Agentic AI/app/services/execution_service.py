@@ -1,11 +1,12 @@
 import logging
 import time
 
+from app import db
 from app.db import SessionLocal
 from app.models.job import Job, JobStatus
 from app.executors import windows_executor, linux_executor
 from app.services.job_lifecycle import update_job_status, append_job_step
-
+from app.services.ledger_service import LedgerService
 
 logger = logging.getLogger("app.services.execution")
 
@@ -104,6 +105,36 @@ def process_job(job_id: str):
             exit_code=0,
         )
 
+        db.commit()
+         # record structured execution summary to ledger
+        try:
+            LedgerService.record_execution(
+                db=db,
+                job_id=job.id,
+                result="SUCCESS" if result.success else "FAILED",
+                details=(
+                    f"exit_code={result.exit_code}; "
+                    f"duration={execution_time}s; "
+                    f"stdout={result.stdout[:500] if result.stdout else 'N/A'}; "
+                    f"stderr={result.stderr[:500] if hasattr(result, 'stderr') and result.stderr else 'N/A'}"
+                ),
+                execution_path=job.connection_method,
+            )
+
+            LedgerService.record_verification(
+                db=db,
+                job_id=job.id,
+                result="SUCCESS" if result.success else "FAILED",
+                details=f"Verification output: {result.stdout[:500] if result.stdout else 'N/A'}",
+            )
+
+            LedgerService.record_final_outcome(
+                db=db,
+                job_id=job.id,
+                outcome="SUCCESS" if result.success else "FAILED",
+            )
+        except Exception as e:
+            logger.exception("failed to write execution records to ledger: %s", e)
         db.commit()
 
         time.sleep(10)

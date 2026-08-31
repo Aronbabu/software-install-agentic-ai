@@ -1,128 +1,182 @@
 import logging
 import uuid
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
+
 from app.db import get_db
-from app.models.job import Job, JobStep,JobStatus
-from app.schemas import JobCreate, JobResponse,JobListResponse,JobStatusUpdate,ExecuteResponse,JobProgressResponse
-from datetime import datetime
-from app.services.job_lifecycle import update_job_status
-from app.services.execution_service import execute_job
+from app.models.job import Job, JobStep, JobStatus
+from app.models.security import AppUser
+from app.models.catalogue import SoftwareCatalogue
+from app.schemas.job_create import (
+    JobCreate,
+    JobResponse,
+    JobListResponse,
+    JobStatusUpdate,
+    ExecuteResponse,
+    JobProgressResponse,
+)
+from app.services.job_lifecycle import update_job_status, append_job_step
 from app.tasks.execution_tasks import process_job_task
 from app.services.authorization_service import AuthorizationService
 from app.services.audit_service import AuditService
-from app.models.security import AppUser
-from datetime import datetime 
-from app.services.job_lifecycle import update_job_status
-from app.services.job_lifecycle import update_job_status, append_job_step
+from app.services.ledger_service import LedgerService
+from app.services.catalogue_rules import is_source_allowed
 
 logger = logging.getLogger("app.routes.jobs")
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
 
-
-def resolve_request_user(
-    db: Session,
-    requested_by: str,
-    ) -> AppUser:
+def resolve_request_user(db: Session, requested_by: str) -> AppUser:
     user = (
         db.query(AppUser)
         .filter(
             AppUser.username == requested_by,
-            AppUser.active.is_(True)
+            AppUser.active.is_(True),
         )
         .first()
     )
+
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=(
-                f"Active application user '{requested_by}' "
-                "was not found"
-            ),
+            detail=f"Active application user '{requested_by}' was not found",
         )
 
     return user
+
 
 @router.post("", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
 def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_db)):
     """
     Create a software installation job.
-    
-    Handles two paths:
-    1. ServiceNow requests: Auto-queued, uses servicenow_svc service account
-    2. Admin Portal requests: Manual execution, uses operator user
-    
-    Args:
-        payload: JobCreate schema with job details
-        request: FastAPI request object
-        db: Database session
-        
-    Returns:
-        JobResponse with created job details
-        
-    Raises:
-        HTTPException 403: User not found or inactive
-        HTTPException 403: Execution not authorized
+
+    Supports:
+    1. ServiceNow requests: auto-queued, uses servicenow_svc service account
+    2. Admin Portal requests: manual execution, uses operator user
+    3. Catalogue-driven requests: software details are loaded from software_catalogue
     """
-    
+
     trace_id = getattr(request.state, "trace_id", str(uuid.uuid4()))
-    
+
+    # =====================================================
+    # STEP 0: Optional catalogue lookup
+    # =====================================================
+    catalogue_item = None
+
+    if getattr(payload, "catalogue_id", None):
+        catalogue_item = (
+            db.query(SoftwareCatalogue)
+            .filter(SoftwareCatalogue.id == payload.catalogue_id)
+            .first()
+        )
+
+        if not catalogue_item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Catalogue item not found",
+            )
+
+        if catalogue_item.status != "ACTIVE":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Catalogue item is inactive",
+            )
+
+        if not is_source_allowed(catalogue_item.request_source, payload.request_source):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Request source is not allowed for this catalogue item",
+            )
+
     # =====================================================
     # STEP 1: Resolve the actor (who is creating this job)
     # =====================================================
-    
     if payload.request_source == "SERVICENOW":
-        # ✅ ServiceNow requests: Use service account
         actor_username = "servicenow_svc"
     else:
-        # ✅ Portal requests: Use provided username
         actor_username = payload.requested_by
-    
+
+    if not actor_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="requested_by is required for portal/API requests",
+        )
+
     try:
         user = resolve_request_user(db=db, requested_by=actor_username)
     except HTTPException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Actor '{actor_username}' not found or inactive"
+            detail=f"Actor '{actor_username}' not found or inactive",
         )
-    
+
     # =====================================================
     # STEP 2: Create the job record
     # =====================================================
-    
     job = Job(
         id=str(uuid.uuid4()),
         ticket_id=payload.ticket_id,
         module="sw-install",
         status=JobStatus.PENDING,
         target_host=payload.target_host,
-        os_type=payload.os_type.lower(),
-        software_name=payload.software_name,
-        software_version=payload.software_version,
-        requested_by=actor_username,  # ✅ Store who is making the request
+        target_port=(
+            payload.target_port
+            if getattr(payload, "target_port", None) is not None
+            else (catalogue_item.target_port if catalogue_item else None)
+        ),
+        os_type=(
+            catalogue_item.os_type if catalogue_item else payload.os_type
+        ).lower(),
+        software_name=(
+            catalogue_item.name if catalogue_item else payload.software_name
+        ),
+        software_version=(
+            catalogue_item.version if catalogue_item else payload.software_version
+        ),
+        requested_by=actor_username,
         justification=payload.justification,
+        notes=getattr(payload, "notes", None),
         trace_id=trace_id,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
         retry_count=0,
         max_retries=payload.max_retries or 3,
         timeout_seconds=payload.timeout_seconds or 300,
-        execution_mode=payload.execution_mode or "immediate",
+        execution_mode=(
+            catalogue_item.execution_mode
+            if catalogue_item
+            else payload.execution_mode or "immediate"
+        ),
         scheduled_time=payload.scheduled_time,
-        target_port=payload.target_port,
-        connection_method=payload.connection_method,
+        connection_method=(
+            catalogue_item.connection_method
+            if catalogue_item
+            else payload.connection_method
+        ),
         request_source=payload.request_source,
         request_reference=payload.request_reference,
     )
-    
+
     db.add(job)
     db.flush()
-    
+
+    LedgerService.create_or_get(
+        db=db,
+        job_id=job.id,
+        request_source=job.request_source,
+        request_reference=job.request_reference,
+        requested_by=actor_username,
+        software_name=job.software_name,
+        target_host=job.target_host,
+        connection_method=job.connection_method,
+    )
+    db.flush()
+
     # =====================================================
     # STEP 3: AUTHORIZATION CHECK
     # =====================================================
-    
     allowed = AuthorizationService.authorize_execution(
         db=db,
         user_id=user.id,
@@ -133,9 +187,8 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         target_host=job.target_host,
         connection_method=job.connection_method,
     )
-    
+
     if not allowed:
-        # ✅ Denied - record audit event
         AuditService.record_event(
             db=db,
             event_type="AUTHORIZATION_DENIED",
@@ -146,22 +199,32 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
             target_host=job.target_host,
             connection_method=job.connection_method,
             result="DENY",
-            message=f"User '{actor_username}' is not authorized to create/execute this job"
+            message=f"User '{actor_username}' is not authorized to create/execute this job",
         )
+
+        LedgerService.record_authorization(
+            db=db,
+            job_id=job.id,
+            result="DENY",
+            reason=f"User '{actor_username}' is not authorized",
+        )
+
         db.commit()
-        
+
         logger.warning(
             "job_creation_denied user=%s request_source=%s reason=insufficient_role",
             actor_username,
-            job.request_source
+            job.request_source,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Job creation/execution not authorized"
+            detail="Job creation/execution not authorized",
         )
-    
-    # ✅ Allowed - record audit event
+
+    # =====================================================
+    # STEP 4: Record allowed authorization
+    # =====================================================
     AuditService.record_event(
         db=db,
         event_type="AUTHORIZATION_ALLOWED",
@@ -172,13 +235,19 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         target_host=job.target_host,
         connection_method=job.connection_method,
         result="ALLOW",
-        message=f"User '{actor_username}' authorized to create/execute this job"
+        message=f"User '{actor_username}' authorized to create/execute this job",
     )
-    
+
+    LedgerService.record_authorization(
+        db=db,
+        job_id=job.id,
+        result="ALLOW",
+        reason=f"User '{actor_username}' is authorized",
+    )
+
     # =====================================================
-    # STEP 4: Record JOB_CREATED audit event
+    # STEP 5: Record JOB_CREATED audit event
     # =====================================================
-    
     AuditService.record_event(
         db=db,
         event_type="JOB_CREATED",
@@ -189,16 +258,15 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         target_host=job.target_host,
         connection_method=job.connection_method,
         result="SUCCESS",
-        message=f"Job created from {job.request_source}"
+        message=f"Job created from {job.request_source}",
     )
-    
+
     db.commit()
     db.refresh(job)
-    
+
     # =====================================================
-    # STEP 5: Create initial job step
+    # STEP 6: Create initial job step
     # =====================================================
-    
     initial_step = JobStep(
         job_id=job.id,
         step_name="job_received",
@@ -209,16 +277,14 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
     )
     db.add(initial_step)
     db.commit()
-    
+
     # =====================================================
-    # STEP 6: AUTO-QUEUE FOR SERVICENOW REQUESTS
+    # STEP 7: AUTO-QUEUE FOR SERVICENOW REQUESTS
     # =====================================================
-    
     if job.request_source == "SERVICENOW":
-        # ✅ ServiceNow requests auto-execute
         try:
             task = process_job_task.delay(job.id)
-            
+
             append_job_step(
                 db=db,
                 job_id=job.id,
@@ -227,7 +293,7 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
                 message=f"ServiceNow request auto-queued. celery_task_id={task.id}",
                 exit_code=0,
             )
-            
+
             AuditService.record_event(
                 db=db,
                 event_type="JOB_AUTO_QUEUED",
@@ -238,40 +304,40 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
                 target_host=job.target_host,
                 connection_method=job.connection_method,
                 result="QUEUED",
-                message="ServiceNow request auto-queued for execution"
+                message="ServiceNow request auto-queued for execution",
             )
-            
+
             db.commit()
-            
+
             logger.info(
                 "job_auto_queued job_id=%s request_reference=%s trace_id=%s",
                 job.id,
                 job.request_reference,
-                trace_id
+                trace_id,
             )
-            
+
         except Exception as e:
             logger.error(
                 "job_auto_queue_failed job_id=%s error=%s",
                 job.id,
-                str(e)
+                str(e),
             )
-            # Log but don't fail - job is created, just queuing failed
-    
     else:
-        # ✅ Portal requests remain PENDING for manual /execute call
         logger.info(
             "job_created_portal job_id=%s ticket_id=%s trace_id=%s",
             job.id,
             job.ticket_id,
-            trace_id
+            trace_id,
         )
-    
+
     return job
+
+
 @router.get("", response_model=JobListResponse)
 def list_jobs(db: Session = Depends(get_db)):
     jobs = db.query(Job).order_by(Job.created_at.desc()).all()
     return JobListResponse(items=jobs, total=len(jobs))
+
 
 @router.get("/{job_id}", response_model=JobResponse)
 def get_job(job_id: str, db: Session = Depends(get_db)):
@@ -280,11 +346,13 @@ def get_job(job_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Job not found")
     return job
 
+
 @router.patch("/{job_id}/status", response_model=JobResponse)
 def patch_job_status(job_id: str, payload: JobStatusUpdate, db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+
     try:
         job = update_job_status(db=db, job=job, new_status=payload.status, message=payload.message)
     except ValueError as exc:
@@ -292,6 +360,7 @@ def patch_job_status(job_id: str, payload: JobStatusUpdate, db: Session = Depend
 
     logger.info("job_status_updated job_id=%s new_status=%s", job.id, job.status.value)
     return job
+
 
 @router.post("/{job_id}/simulate-run", response_model=JobResponse)
 def simulate_job_run(job_id: str, db: Session = Depends(get_db)):
@@ -314,62 +383,35 @@ def simulate_job_run(job_id: str, db: Session = Depends(get_db)):
     return job
 
 
-
 @router.post("/{job_id}/execute", response_model=ExecuteResponse)
-def execute(
-    job_id: str, 
-    db: Session = Depends(get_db)
-):
-    """
-    Execute a job with authorization using the STORED requested_by.
-    
-    No need to pass requested_by - it's already stored in the job!
-    
-    Args:
-        job_id: The job ID to execute
-        db: Database session
-        
-    Returns:
-        ExecuteResponse with job_id and message
-        
-    Raises:
-        HTTPException 404: Job not found
-        HTTPException 400: Job already completed or scheduled time not reached
-        HTTPException 403: User not authorized to execute
-    """
-    
-    # ✅ STEP 1: Get the job
+def execute(job_id: str, db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
-    
-    # ✅ STEP 2: Get the STORED actor (from when job was created)
+
     actor_username = job.requested_by
-    
-    # Resolve to AppUser object
+
     try:
         user = resolve_request_user(db=db, requested_by=actor_username)
     except HTTPException:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User '{actor_username}' not found or inactive"
+            detail=f"User '{actor_username}' not found or inactive",
         )
-    
-    # ✅ STEP 3: Check execution eligibility (status, scheduled time)
+
     if job.execution_mode == "scheduled" and job.scheduled_time:
         if job.scheduled_time > datetime.utcnow():
             raise HTTPException(
-                status_code=400, 
-                detail="Job is scheduled for later execution"
+                status_code=400,
+                detail="Job is scheduled for later execution",
             )
-    
+
     if job.status in [JobStatus.SUCCESS, JobStatus.FAILED, JobStatus.FAILED_FINAL]:
         raise HTTPException(
-            status_code=400, 
-            detail="Job already completed"
+            status_code=400,
+            detail="Job already completed",
         )
-    
-    # ✅ STEP 4: AUTHORIZATION CHECK using stored actor
+
     allowed = AuthorizationService.authorize_execution(
         db=db,
         user_id=user.id,
@@ -380,8 +422,7 @@ def execute(
         target_host=job.target_host,
         connection_method=job.connection_method,
     )
-    
-    # ✅ STEP 5: If NOT authorized, record audit event and reject
+
     if not allowed:
         AuditService.record_event(
             db=db,
@@ -393,23 +434,22 @@ def execute(
             target_host=job.target_host,
             connection_method=job.connection_method,
             result="DENY",
-            message=f"User '{actor_username}' is not authorized to execute this job"
+            message=f"User '{actor_username}' is not authorized to execute this job",
         )
         db.commit()
-        
+
         logger.warning(
             "execution_denied user=%s job_id=%s target=%s reason=insufficient_role",
             actor_username,
             job.id,
-            job.target_host
+            job.target_host,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Execution not authorized"
+            detail="Execution not authorized",
         )
-    
-    # ✅ STEP 6: If authorized, record successful authorization audit event
+
     AuditService.record_event(
         db=db,
         event_type="EXECUTION_AUTHORIZED",
@@ -420,28 +460,17 @@ def execute(
         target_host=job.target_host,
         connection_method=job.connection_method,
         result="ALLOW",
-        message=f"User '{actor_username}' authorized to execute job"
+        message=f"User '{actor_username}' authorized to execute job",
     )
-    
+
     db.commit()
-    
-    # ✅ STEP 7: Queue the job for execution
-    if (
-        job.execution_mode == "scheduled"
-        and job.scheduled_time
-    ):
-        # Schedule for later
-        process_job_task.apply_async(
-            args=[job.id],
-            eta=job.scheduled_time
-        )
-        
+
+    if job.execution_mode == "scheduled" and job.scheduled_time:
+        process_job_task.apply_async(args=[job.id], eta=job.scheduled_time)
         message = f"Job scheduled for {job.scheduled_time}"
-        
     else:
-        # Execute immediately
         task = process_job_task.delay(job.id)
-        
+
         append_job_step(
             db=db,
             job_id=job.id,
@@ -451,40 +480,40 @@ def execute(
             exit_code=0,
         )
         db.commit()
-        
         message = "Job queued for execution"
-    
-    # ✅ STEP 8: Log and return success response
+
     logger.info(
         "job_execution_queued job_id=%s user=%s target=%s mode=%s",
         job.id,
         actor_username,
         job.target_host,
-        job.execution_mode
-    )
-    
-    return ExecuteResponse(
-        job_id=job.id,
-        message=message
+        job.execution_mode,
     )
 
-@router.get("/{job_id}/progress",response_model=JobProgressResponse)
+    return ExecuteResponse(job_id=job.id, message=message)
+
+
+@router.get("/{job_id}/progress", response_model=JobProgressResponse)
 def get_job_progress(job_id: str, db: Session = Depends(get_db)):
     job = db.query(Job).filter(Job.id == job_id).first()
 
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    steps = db.query(JobStep).filter(JobStep.job_id == job_id).order_by(JobStep.created_at).all()
+    steps = (
+        db.query(JobStep)
+        .filter(JobStep.job_id == job_id)
+        .order_by(JobStep.created_at)
+        .all()
+    )
 
     return {
         "job_id": job.id,
         "status": job.status,
         "trace_id": job.trace_id,
-        "last_error": job.last_error,         
-        "retry_count": job.retry_count,       
+        "last_error": job.last_error,
+        "retry_count": job.retry_count,
         "max_retries": job.max_retries,
-
         "steps": [
             {
                 "id": s.id,
@@ -495,5 +524,5 @@ def get_job_progress(job_id: str, db: Session = Depends(get_db)):
                 "created_at": s.created_at,
             }
             for s in steps
-        ]
+        ],
     }

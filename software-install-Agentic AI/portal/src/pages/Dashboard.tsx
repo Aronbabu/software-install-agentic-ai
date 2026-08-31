@@ -7,85 +7,52 @@ export default function Dashboard() {
     running_jobs: 0,
     success_jobs: 0,
     failed_jobs: 0,
-    workers: 0
+    workers: 0,
   });
 
   useEffect(() => {
-    getDashboardSummary()
-      .then(setSummary)
-      .catch(console.error);
+    getDashboardSummary().then(setSummary).catch(console.error);
   }, []);
-  const cardStyle = {
-  background: "white",
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "20px",
-  textAlign: "center" as const,
-  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-  transition: "transform 0.2s",
-  cursor: "pointer",
-};
+
   return (
-  <div
-    style={{
-      maxWidth: "1200px",
-      margin: "0 auto",
-    }}
-  >
-    <h1
-      style={{
-        marginBottom: "20px",
-      }}
-    >
-      Dashboard
-    </h1>
-
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
-        gap: "20px",
-      }}
-    >
-
-      <div style={cardStyle}>
-        <h3>Total Jobs</h3>
-        <h1>{summary.total_jobs}</h1>
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Dashboard</h1>
+          <p className="page-subtitle">Operational overview of jobs and workers.</p>
+        </div>
       </div>
 
-      <div style={cardStyle}>
-        <h3>Running</h3>
-        <h1>{summary.running_jobs}</h1>
-      </div>
+      <div className="grid-5">
+        <div className="card metric">
+          <div className="metric-label">Total Jobs</div>
+          <div className="metric-value">{summary.total_jobs}</div>
+        </div>
 
-      <div style={cardStyle}>
-        <h3>Success</h3>
-        <h1
-          style={{
-            color: "green",
-          }}
-        >
-          {summary.success_jobs}
-        </h1>
-      </div>
+        <div className="card metric">
+          <div className="metric-label">Running</div>
+          <div className="metric-value">{summary.running_jobs}</div>
+        </div>
 
-      <div style={cardStyle}>
-        <h3>Failed</h3>
-        <h1
-          style={{
-            color: "red",
-          }}
-        >
-          {summary.failed_jobs}
-        </h1>
-      </div>
+        <div className="card metric">
+          <div className="metric-label">Success</div>
+          <div className="metric-value" style={{ color: "var(--success)" }}>
+            {summary.success_jobs}
+          </div>
+        </div>
 
-      <div style={cardStyle}>
-        <h3>Workers</h3>
-        <h1>{summary.workers}</h1>
-      </div>
+        <div className="card metric">
+          <div className="metric-label">Failed</div>
+          <div className="metric-value" style={{ color: "var(--danger)" }}>
+            {summary.failed_jobs}
+          </div>
+        </div>
 
+        <div className="card metric">
+          <div className="metric-label">Workers</div>
+          <div className="metric-value">{summary.workers}</div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
 }

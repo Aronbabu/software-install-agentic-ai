@@ -1,52 +1,55 @@
 import { NavLink } from "react-router-dom";
 
-const menuItems = [
-  { name: "Dashboard", path: "/" },
-  { name: "Jobs", path: "/jobs" },
-  { name: "Workers", path: "/workers" },
-  { name: "Audit", path: "/audit" },
-  { name: "Decision Ledger", path: "/ledger" },
-  { name: "Software Catalog", path: "/catalog" },
-  { name: "Authorization", path: "/authorization" },
-  { name: "Settings", path: "/settings" },
+type MenuItem = {
+  name: string;
+  path: string;
+  icon: string;
+};
+
+const menuItems: MenuItem[] = [
+  { name: "Dashboard", path: "/", icon: "📊" },
+  { name: "Jobs", path: "/jobs", icon: "🧩" },
+  { name: "Audit Log", path: "/audit-log", icon: "📝" },
+  { name: "Decision Ledger", path: "/ledger", icon: "📘" },
+  { name: "Catalogue", path: "/catalogue", icon: "🗂️" },
+  { name: "Authorization", path: "/authorization", icon: "🔒" },
+  { name: "Settings", path: "/settings", icon: "⚙️" },
 ];
 
 export default function Sidebar() {
   return (
-    <div
-      style={{
-        width: "250px",
-        background: "#1e293b",
-        color: "white",
-        minHeight: "100vh",
-        padding: "20px",
-      }}
-    >
-      <h2>Agentic AI Platform</h2>
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <div className="sidebar-logo">AI</div>
+        <div>
+          <h2 className="sidebar-title">Agentic AI</h2>
+          <p className="sidebar-subtitle">Admin Portal</p>
+        </div>
+      </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          marginTop: "20px",
-        }}
-      >
+      <div className="sidebar-section-label">Navigation</div>
+
+      <nav className="sidebar-nav">
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            style={{
-              color: "white",
-              textDecoration: "none",
-              padding: "8px",
-              borderRadius: "4px",
-            }}
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
           >
-            {item.name}
+            <span className="sidebar-link-icon">{item.icon}</span>
+            <span>{item.name}</span>
           </NavLink>
         ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <div className="sidebar-footer-card">
+          <div className="sidebar-footer-label">Auth Mode</div>
+          <div className="sidebar-footer-value">Local + SSO ready</div>
+        </div>
       </div>
-    </div>
+    </aside>
   );
 }

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String
 
 from app.db.base import Base
 
@@ -12,7 +13,7 @@ class AuditEvent(Base):
     __tablename__ = "audit_events"
 
     id = Column(
-        UUID(as_uuid=True),
+        String(36),
         primary_key=True,
         default=uuid.uuid4,
     )
@@ -35,16 +36,8 @@ class AuditEvent(Base):
         index=True,
     )
 
-    job_id = Column(
-        UUID(as_uuid=True),
-        nullable=True,
-        index=True,
-    )
-
-    actor_id = Column(
-        UUID(as_uuid=True),
-        nullable=True,
-    )
+    job_id = Column(String(36), nullable=True, index=True)
+    actor_id = Column(String(36), nullable=True)
 
     target_host = Column(
         String(255),

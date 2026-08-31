@@ -1,35 +1,41 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../../auth/auth";
 
 export default function Topbar() {
-  return (
-    <div
-      style={{
-        background: "#ffffff",
-        padding: "15px 20px",
-        borderBottom: "1px solid #ddd",
-      }}
-    >
-      <Link
-        to="/"
-        style={{
-          textDecoration: "none",
-          color: "#2563eb",
-          fontSize: "24px",
-          fontWeight: "bold",
-        }}
-      >
-        Agentic AI Platform
-      </Link>
+  const navigate = useNavigate();
 
-      <div
-        style={{
-          fontSize: "14px",
-          color: "#666",
-          marginTop: "4px",
-        }}
-      >
-        Development Environment
+  const handleLogout = () => {
+    auth.signOut();
+    navigate("/login", { replace: true });
+  };
+
+  return (
+    <header className="topbar">
+      <div>
+        <Link to="/" className="topbar-title">
+          Agentic AI Platform
+        </Link>
+        <div className="topbar-subtitle">Development Environment</div>
       </div>
-    </div>
+
+      <div className="topbar-actions">
+        <div className="topbar-chip">
+          <span className="topbar-chip-dot" />
+          <span>Local auth</span>
+        </div>
+
+        <div className="topbar-user">
+          <div className="topbar-user-dot" />
+          <div>
+            <div className="topbar-user-label">Signed in locally</div>
+            <div className="topbar-user-subtitle">SSO coming later</div>
+          </div>
+        </div>
+
+        <button type="button" onClick={handleLogout} className="logout-button">
+          Logout
+        </button>
+      </div>
+    </header>
   );
 }

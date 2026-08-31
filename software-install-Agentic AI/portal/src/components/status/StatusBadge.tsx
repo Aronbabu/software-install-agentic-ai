@@ -2,30 +2,22 @@ type StatusBadgeProps = {
   status: string;
 };
 
-export default function StatusBadge({
-  status,
-}: StatusBadgeProps) {
+const statusClassMap: Record<string, string> = {
+  SUCCESS: "badge badge-success",
+  RUNNING: "badge badge-info",
+  VERIFYING: "badge badge-purple",
+  FAILED: "badge badge-warning",
+  FAILED_FINAL: "badge badge-danger",
+  VALIDATING: "badge badge-neutral",
+  PENDING: "badge badge-muted",
+  ALLOW: "badge badge-success",
+  DENY: "badge badge-danger",
+  QUEUED: "badge badge-info",
+};
 
-  const styles: Record<string, string> = {
-    SUCCESS: "green",
-    RUNNING: "blue",
-    VERIFYING: "purple",
-    FAILED: "orange",
-    FAILED_FINAL: "red",
-    VALIDATING: "gold",
-    PENDING: "gray",
-  };
-
+export default function StatusBadge({ status }: StatusBadgeProps) {
   return (
-    <span
-      style={{
-        backgroundColor: styles[status] || "gray",
-        color: "white",
-        padding: "4px 8px",
-        borderRadius: "4px",
-        fontWeight: "bold",
-      }}
-    >
+    <span className={statusClassMap[status] ?? "badge badge-muted"}>
       {status}
     </span>
   );

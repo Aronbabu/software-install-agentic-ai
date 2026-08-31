@@ -1,3 +1,3 @@
-from app.services.authorization_service import AuthorizationService
-
-print("Authorization Service Loaded")
+from app.db.base import Base
+import app.models
+print("software_catalogue" in Base.metadata.tables)
