@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: 2026-08-27 12:46:11.545245
+Generated: 2026-09-01 11:43:21.782606
 
 ```text
 software-install-Agentic AI
@@ -12,9 +12,13 @@ software-install-Agentic AI
 │   │   ├── 004_add_workflow_ready_fields.py
 │   │   ├── 005_add_final_failed_final_statu.py
 │   │   ├── 006_add_target_port_connection_method.py
-│   │   └── 007_authorization_foundation_and_request_.py
+│   │   ├── 007_authorization_foundation_and_request_.py
+│   │   ├── 008_28c39c6ee0ba_audit_foundation.py
+│   │   ├── 009_861e52f4c182_minimum_decision_ledger.py
+│   │   ├── 010_4d02e3285388_add_service_account_credentials_table.py
+│   │   ├── 011_a809fac38d62_update_audit_fields.py
+│   │   └── 012_9a91edbf6e39_create_software_catalogue.py
 │   ├── env.py
-│   ├── env1.py
 │   ├── README
 │   └── script.py.mako
 ├── app
@@ -31,26 +35,35 @@ software-install-Agentic AI
 │   ├── models
 │   │   ├── __init__.py
 │   │   ├── audit.py
+│   │   ├── catalogue.py
+│   │   ├── catalogue_constants.py
 │   │   ├── job.py
 │   │   ├── ledger.py
 │   │   └── security.py
 │   ├── queue
 │   │   ├── __init__.py
-│   │   ├── job_queue.py
-│   │   └── job_queue1.py
+│   │   └── job_queue.py
 │   ├── routes
 │   │   ├── __init__.py
+│   │   ├── catalogue_api.py
 │   │   ├── dashboard.py
 │   │   ├── jobs.py
+│   │   ├── ledger_api.py
 │   │   └── monitor_api.py
+│   ├── schemas
+│   │   └── job_create.py
 │   ├── services
 │   │   ├── __init__.py
 │   │   ├── audit_service.py
 │   │   ├── authorization_service.py
+│   │   ├── catalogue_rules.py
+│   │   ├── catalogue_service.py
 │   │   ├── credential_provider.py
 │   │   ├── execution_policy.py
 │   │   ├── execution_service.py
-│   │   └── job_lifecycle.py
+│   │   ├── job_lifecycle.py
+│   │   ├── job_service.py
+│   │   └── ledger_service.py
 │   ├── tasks
 │   │   ├── __init__.py
 │   │   └── execution_tasks.py
@@ -59,11 +72,12 @@ software-install-Agentic AI
 │   ├── __init__.py
 │   ├── celery_app.py
 │   ├── config.py
-│   ├── db.py
+│   ├── db_legacy.py
 │   ├── logging_config.py
 │   ├── main.py
 │   ├── middleware.py
-│   └── schemas.py
+│   ├── schemas_test.py
+│   └── seed_catalogue.py
 ├── entra-test
 │   ├── .env
 │   ├── app.py
@@ -75,6 +89,7 @@ software-install-Agentic AI
 │   │   └── icons.svg
 │   ├── src
 │   │   ├── api
+│   │   │   ├── auditApi.ts
 │   │   │   ├── client.ts
 │   │   │   ├── dashboardApi.ts
 │   │   │   ├── jobDetailsApi.ts
@@ -83,17 +98,24 @@ software-install-Agentic AI
 │   │   │   ├── hero.png
 │   │   │   ├── react.svg
 │   │   │   └── vite.svg
+│   │   ├── auth
+│   │   │   └── auth.ts
 │   │   ├── components
 │   │   │   ├── layout
 │   │   │   │   ├── AdminLayout.tsx
+│   │   │   │   ├── Breadcrumbs.tsx
 │   │   │   │   ├── Sidebar.tsx
 │   │   │   │   └── Topbar.tsx
 │   │   │   └── status
 │   │   │       └── StatusBadge.tsx
 │   │   ├── pages
+│   │   │   ├── AuditLog.tsx
+│   │   │   ├── Catalogue.tsx
 │   │   │   ├── Dashboard.tsx
 │   │   │   ├── JobDetails.tsx
-│   │   │   └── Jobs.tsx
+│   │   │   ├── Jobs.tsx
+│   │   │   ├── Login.tsx
+│   │   │   └── NewJobRequest.tsx
 │   │   ├── routes
 │   │   │   └── routes.tsx
 │   │   ├── types
@@ -118,6 +140,7 @@ software-install-Agentic AI
 │   │   ├── current_status.md
 │   │   ├── master flow.md
 │   │   └── new_hybrid_mvp_full.md
+│   ├── generate_project_structure.py
 │   ├── Master_Context copy.md
 │   ├── Master_Context.md
 │   ├── Master_Context_ph2.md
@@ -137,14 +160,15 @@ software-install-Agentic AI
 │   ├── Project_Structure_work.md
 │   └── ref.txt
 ├── python tools
-│   ├── project_reference
-│   │   ├── Project_File_Inventory.csv
-│   │   └── Project_Structure.md
-│   └── generate_project_structure.py
+│   └── project_reference
+│       ├── Project_File_Inventory.csv
+│       └── Project_Structure.md
+├── scripts
 ├── .dockerignore
 ├── .env
 ├── .env.example
 ├── alembic.ini
+├── codebase_structure.txt
 ├── createfiest.py
 ├── deliverables
 ├── docker-compose copy 2.yml
@@ -160,7 +184,10 @@ software-install-Agentic AI
 ├── README.md
 ├── redistest.py
 ├── ref
+├── repo_structure1.txt
+├── repo_structure1stsep.txt
 ├── requirements.txt
 ├── test.py
-└── test1.py
+├── test1.py
+└── utility.py
 ```

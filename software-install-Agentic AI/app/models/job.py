@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, ForeignKey, Integer,Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy import Enum as SqlEnum
+from sqlalchemy import Text  # (likely already imported)
 
 from app.db.base import Base
 
@@ -86,7 +87,7 @@ class Job(Base):
 
 
     steps = relationship("JobStep", back_populates="job", cascade="all, delete-orphan")
-
+    notes = Column(Text, nullable=True)
 
 class JobStep(Base):
     __tablename__ = "job_steps"

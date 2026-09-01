@@ -7,6 +7,7 @@ from datetime import datetime
 # ==========================================
 
 ROOT_DIR = Path.cwd()
+print(ROOT_DIR)
 
 OUTPUT_DIR = ROOT_DIR / "project_reference"
 OUTPUT_DIR.mkdir(exist_ok=True)

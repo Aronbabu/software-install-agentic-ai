@@ -122,9 +122,9 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         status=JobStatus.PENDING,
         target_host=payload.target_host,
         target_port=(
-            payload.target_port
+            int(payload.target_port)
             if getattr(payload, "target_port", None) is not None
-            else (catalogue_item.target_port if catalogue_item else None)
+            else (int(catalogue_item.target_port) if catalogue_item and catalogue_item.target_port else None)
         ),
         os_type=(
             catalogue_item.os_type if catalogue_item else payload.os_type
