@@ -98,6 +98,10 @@ status
 endpoint
 last_heartbeat
 
+INDIA-WS-MCP01
+INDIA-LX-MCP01
+``
+
 FastAPI
     |
 MCP Gateway

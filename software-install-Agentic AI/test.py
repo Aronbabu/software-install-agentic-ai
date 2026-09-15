@@ -1,7 +1,7 @@
 import paramiko
 
 HOST = "10.84.40.84"
-USERNAME = 'ctscsitlab\\458027-admin'
+USERNAME = 'ctscsitlab\\458027-admin1'
 PASSWORD = 'N7@qL9!xP2#m'
 
 client = paramiko.SSHClient()

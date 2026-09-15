@@ -18,7 +18,7 @@ from app.schemas.job_create import (
     JobProgressResponse,
 )
 from app.services.job_lifecycle import update_job_status, append_job_step
-from app.tasks.execution_tasks import process_job_task
+from app.tasks.orchestration_tasks import orchestrate_job_task
 from app.services.authorization_service import AuthorizationService
 from app.services.audit_service import AuditService
 from app.services.ledger_service import LedgerService
@@ -283,16 +283,16 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
     # =====================================================
     if job.request_source == "SERVICENOW":
         try:
-            task = process_job_task.delay(job.id)
+            task = orchestrate_job_task.delay(job.id)
 
             append_job_step(
                 db=db,
                 job_id=job.id,
                 step_name="job_auto_queued",
                 status="SUCCESS",
-                message=f"ServiceNow request auto-queued. celery_task_id={task.id}",
+                message=f"ServiceNow request auto-queued to orchestrator. celery_task_id={task.id}",
                 exit_code=0,
-            )
+        )
 
             AuditService.record_event(
                 db=db,
@@ -304,7 +304,7 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
                 target_host=job.target_host,
                 connection_method=job.connection_method,
                 result="QUEUED",
-                message="ServiceNow request auto-queued for execution",
+                message="ServiceNow request auto-queued for orchestration",
             )
 
             db.commit()
@@ -466,21 +466,21 @@ def execute(job_id: str, db: Session = Depends(get_db)):
     db.commit()
 
     if job.execution_mode == "scheduled" and job.scheduled_time:
-        process_job_task.apply_async(args=[job.id], eta=job.scheduled_time)
+        orchestrate_job_task.apply_async(args=[job.id], eta=job.scheduled_time)
         message = f"Job scheduled for {job.scheduled_time}"
     else:
-        task = process_job_task.delay(job.id)
+        task = orchestrate_job_task.delay(job.id)
 
         append_job_step(
             db=db,
             job_id=job.id,
             step_name="job_queued",
             status="SUCCESS",
-            message=f"Job queued to Celery. celery_task_id={task.id}",
+            message=f"Job queued to orchestrator. celery_task_id={task.id}",
             exit_code=0,
         )
         db.commit()
-        message = "Job queued for execution"
+        message = "Job queued for orchestration"
 
     logger.info(
         "job_execution_queued job_id=%s user=%s target=%s mode=%s",

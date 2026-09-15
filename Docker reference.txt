@@ -1,3 +1,4 @@
+uvicorn app.main:app --reload
 
 Step1:go to project folder
 docker compose up -d --build \\when changes
@@ -31,6 +32,7 @@ only to build one container : docker compose build user below serivce name eg be
 
 name:--------
 docker ps --format "table {{.Names}}\t{{.Status}}"
+docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Ports}}"
 
 docker compose config --services
 
@@ -104,3 +106,13 @@ password : root
 
 exit to come out
 docker exec -it 967bfc638d5b hostname -I //to get host ip of container
+
+
+to run direct querries from docker postgres
+
+docker exec -it software-install-postgres-local psql -U postgres -d software_install -c "SELECT * FROM alembic_version;"
+docker exec -it software-install-postgres-local psql -U postgres -d software_install -c "SELECT * FROM alembic_version;"
+
+optiona if failed to create docker exec -it software-install-postgres-local psql -U postgres -d postgres -c "DROP DATABASE IF EXISTS software_install WITH (FORCE);"
+
+docker exec -it software-install-postgres-local psql -U postgres -d postgres -c "CREATE DATABASE software_install;"

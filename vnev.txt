@@ -1,0 +1,16 @@
+deactivate
+Remove-Item .venv -Recurse -Force
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+ pip install -r requirements.txt
+``
+python -m uvicorn app.main:app --reload
+
+celery -A app.celery_app.celery_app worker --loglevel=info
+celery -A app.celery_app.celery_app worker --pool=solo --loglevel=info
+
+
+1.local
+
+2.docker full stack

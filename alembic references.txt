@@ -1,0 +1,13 @@
+
+alembic init alembic //it will crearte folder and update .env file
+
+maintain versions, while making changes on models, below command will automaticlaly crearte vesions
+
+alembic revision --autogenerate -m "add execution fields" //rename revision filename ass uniform and updte revision value in same file
+
+alembic upgrade head
+
+
+alembic current
+
+alembic downgrade 4d02e3285388

@@ -1,7 +1,9 @@
 File,Extension,Size(KB),Last Modified
 .dockerignore,,0.14,2026-08-17 20:16:41
-.env,,0.47,2026-08-30 16:22:32
+.env,,0.93,2026-09-08 19:07:34
 .env.example,.example,0.19,2026-05-29 16:55:10
+.env.local,.local,0.93,2026-09-08 19:05:52
+.envbackup,,0.47,2026-08-30 16:22:32
 alembic.ini,.ini,0.62,2026-06-01 14:47:55
 codebase_structure.txt,.txt,0.05,2026-08-30 16:56:29
 createfiest.py,.py,1.84,2026-08-17 18:01:05
@@ -9,27 +11,30 @@ deliverables,,6.52,2026-08-10 11:27:31
 docker-compose copy 2.yml,.yml,1.04,2026-07-15 15:12:33
 docker-compose copy 3.yml,.yml,1.06,2026-07-21 18:52:03
 docker-compose copy.yml,.yml,0.7,2026-07-14 15:28:42
+docker-compose.local-infra.yml,.yml,0.7,2026-09-08 17:44:45
 docker-compose.yml,.yml,2.07,2026-08-28 16:28:41
+docker-compose_phase4.yml,.yml,5.75,2026-09-08 17:18:21
 docker-compose_redis.yml,.yml,0.58,2026-07-20 19:05:21
 docker-compose_updated.yml,.yml,1.69,2026-07-21 18:47:14
 Dockerfile,,0.22,2026-07-15 15:44:29
 fs2.txt,.txt,374.38,2026-07-15 11:06:51
 implementations.md,.md,0.81,2026-08-18 11:21:11
+locaenv.txt,.txt,0.71,2026-09-09 11:16:36
 portal_implementations.md,.md,1.1,2026-08-28 14:59:07
 README.md,.md,0.58,2026-07-31 14:58:26
 redistest.py,.py,0.12,2026-07-15 15:23:17
 ref,,3.67,2026-08-17 19:55:54
 repo_structure1.txt,.txt,0.05,2026-08-31 12:36:27
 repo_structure1stsep.txt,.txt,0.05,2026-09-01 11:36:42
-requirements.txt,.txt,0.24,2026-08-19 12:54:32
+requirements.txt,.txt,0.26,2026-09-08 16:15:16
 test.py,.py,0.56,2026-08-19 19:26:02
 test1.py,.py,0.1,2026-08-31 18:55:43
 utility.py,.py,1.63,2026-08-30 18:36:23
 alembic\env.py,.py,1.33,2026-08-31 18:39:24
 alembic\README,,0.04,2026-06-05 15:48:08
 alembic\script.py.mako,.mako,0.62,2026-06-05 15:48:08
-app\celery_app.py,.py,0.67,2026-07-29 15:03:22
-app\config.py,.py,0.91,2026-07-21 19:31:56
+app\celery_app.py,.py,0.67,2026-09-08 17:07:14
+app\config.py,.py,1.63,2026-09-08 16:17:14
 app\db_legacy.py,.py,0.52,2026-07-22 15:50:07
 app\logging_config.py,.py,0.25,2026-05-31 16:49:32
 app\main.py,.py,2.46,2026-08-31 18:23:52
@@ -62,9 +67,9 @@ project_reference\new_plans.md,.md,1.78,2026-08-06 17:40:26
 project_reference\new_project_scope.md,.md,8.48,2026-08-05 12:06:05
 project_reference\new_scope_highlevel.md,.md,1.8,2026-08-05 12:53:08
 project_reference\new_timeline.md,.md,7.44,2026-08-11 17:19:43
-project_reference\Project_File_Inventory.csv,.csv,8.97,2026-09-01 11:38:01
+project_reference\Project_File_Inventory.csv,.csv,8.97,2026-09-01 11:43:38
 project_reference\project_metadata.yaml,.yaml,0.39,2026-07-01 18:59:15
-project_reference\Project_Structure.md,.md,6.55,2026-09-01 11:43:22
+project_reference\Project_Structure.md,.md,7.57,2026-09-09 11:17:55
 project_reference\Project_Structure1.md,.md,1.64,2026-07-01 18:32:28
 project_reference\Project_Structure2.md,.md,2.23,2026-07-20 18:49:54
 project_reference\Project_Structure_work.md,.md,2.05,2026-08-17 14:16:18
@@ -74,6 +79,8 @@ python tools\project_reference\Project_Structure.md,.md,0.16,2026-08-17 14:13:52
 project_reference\fresh start\current_status.md,.md,0.79,2026-08-08 11:09:47
 project_reference\fresh start\master flow.md,.md,1.55,2026-08-07 19:23:51
 project_reference\fresh start\new_hybrid_mvp_full.md,.md,6.07,2026-08-11 17:19:43
+project_reference\project_reference\Project_File_Inventory.csv,.csv,1.22,2026-09-01 11:43:42
+project_reference\project_reference\Project_Structure.md,.md,0.83,2026-09-01 11:43:42
 portal\public\favicon.svg,.svg,9.3,2026-08-17 18:30:36
 portal\public\icons.svg,.svg,4.91,2026-08-17 18:30:36
 portal\src\App.css,.css,2.82,2026-08-17 18:30:36
@@ -90,7 +97,7 @@ portal\src\assets\react.svg,.svg,4.03,2026-08-17 18:30:36
 portal\src\assets\vite.svg,.svg,8.5,2026-08-17 18:30:36
 portal\src\auth\auth.ts,.ts,0.3,2026-08-31 16:11:57
 portal\src\pages\AuditLog.tsx,.tsx,5.06,2026-08-31 16:03:32
-portal\src\pages\Catalogue.tsx,.tsx,5.19,2026-08-31 19:46:06
+portal\src\pages\Catalogue.tsx,.tsx,17.13,2026-09-01 15:42:06
 portal\src\pages\Dashboard.tsx,.tsx,1.71,2026-08-31 15:39:38
 portal\src\pages\JobDetails.tsx,.tsx,9.27,2026-08-31 19:06:08
 portal\src\pages\Jobs.tsx,.tsx,1.92,2026-08-31 15:39:49
@@ -104,6 +111,11 @@ portal\src\components\layout\Breadcrumbs.tsx,.tsx,0.85,2026-08-31 16:27:51
 portal\src\components\layout\Sidebar.tsx,.tsx,1.65,2026-08-31 17:23:25
 portal\src\components\layout\Topbar.tsx,.tsx,1.11,2026-08-31 16:24:11
 portal\src\components\status\StatusBadge.tsx,.tsx,0.62,2026-08-31 15:38:56
+backup\phase3\.env,,0.47,2026-08-30 16:22:32
+backup\phase3\docker-compose.yml,.yml,2.07,2026-08-28 16:28:41
+backup\phase3\Dockerfile,,0.22,2026-07-15 15:44:29
+backup\phase3\phase3_software_install_demo_backup.sql,.sql,134.72,2026-09-02 15:55:20
+app\ai\__init__.py,.py,0.68,2026-09-08 17:16:34
 app\db\base.py,.py,0.07,2026-08-20 17:20:04
 app\db\init_db.py,.py,1.14,2026-08-20 19:27:46
 app\db\session.py,.py,0.42,2026-08-20 17:46:50
@@ -112,18 +124,25 @@ app\executors\linux_executor.py,.py,2.84,2026-08-17 17:38:18
 app\executors\result_models.py,.py,0.28,2026-06-07 17:38:54
 app\executors\windows_executor.py,.py,2.16,2026-07-01 14:08:43
 app\executors\__init__.py,.py,0.0,2026-06-02 15:57:37
+app\knowledge\__init__.py,.py,0.68,2026-09-08 17:17:00
+app\models\ai_request.py,.py,0.78,2026-09-08 17:01:33
+app\models\ai_response.py,.py,0.76,2026-09-08 17:02:28
 app\models\audit.py,.py,1.23,2026-08-31 14:29:54
 app\models\catalogue.py,.py,1.13,2026-08-31 18:39:12
 app\models\catalogue_constants.py,.py,0.19,2026-08-31 18:15:51
-app\models\job.py,.py,2.96,2026-08-28 19:28:07
+app\models\execution_plan.py,.py,1.26,2026-09-08 17:02:59
+app\models\job.py,.py,3.16,2026-09-08 16:18:38
+app\models\knowledge_article.py,.py,0.89,2026-09-08 16:21:12
+app\models\knowledge_chunk.py,.py,1.1,2026-09-08 16:21:40
 app\models\ledger.py,.py,2.34,2026-08-28 19:34:53
 app\models\security.py,.py,6.03,2026-08-30 18:27:48
-app\models\__init__.py,.py,0.44,2026-08-31 18:51:18
+app\models\sop_repository.py,.py,0.93,2026-09-08 16:19:22
+app\models\__init__.py,.py,1.28,2026-09-08 17:07:03
 app\queue\job_queue.py,.py,0.51,2026-07-29 15:31:39
 app\queue\__init__.py,.py,0.0,2026-06-05 10:39:54
 app\routes\catalogue_api.py,.py,2.29,2026-08-31 18:23:16
 app\routes\dashboard.py,.py,0.97,2026-08-20 17:47:40
-app\routes\jobs.py,.py,17.58,2026-08-31 20:11:18
+app\routes\jobs.py,.py,17.62,2026-09-01 11:57:35
 app\routes\ledger_api.py,.py,3.34,2026-08-31 15:07:18
 app\routes\monitor_api.py,.py,1.95,2026-07-21 19:18:16
 app\routes\__init__.py,.py,0.0,2026-05-29 14:34:54
@@ -139,7 +158,9 @@ app\services\job_lifecycle.py,.py,1.66,2026-08-20 17:47:40
 app\services\job_service.py,.py,1.45,2026-08-31 19:38:43
 app\services\ledger_service.py,.py,3.39,2026-08-28 19:24:44
 app\services\__init__.py,.py,0.0,2026-06-02 11:04:30
-app\tasks\execution_tasks.py,.py,2.67,2026-08-20 17:47:40
+app\tasks\execution_tasks.py,.py,3.01,2026-09-08 17:11:38
+app\tasks\orchestration_tasks.py,.py,2.69,2026-09-08 17:08:26
+app\tasks\planning_tasks.py,.py,2.44,2026-09-08 17:09:19
 app\tasks\__init__.py,.py,0.0,2026-07-14 15:08:06
 app\workers\celery_worker.py,.py,0.27,2026-07-20 19:08:05
 alembic\versions\0001_create_jobs_and_job_steps.py,.py,2.53,2026-06-01 15:13:23
@@ -154,3 +175,5 @@ alembic\versions\009_861e52f4c182_minimum_decision_ledger.py,.py,2.96,2026-08-28
 alembic\versions\010_4d02e3285388_add_service_account_credentials_table.py,.py,1.47,2026-08-30 19:03:38
 alembic\versions\011_a809fac38d62_update_audit_fields.py,.py,1.65,2026-08-31 18:35:14
 alembic\versions\012_9a91edbf6e39_create_software_catalogue.py,.py,2.41,2026-08-31 19:02:12
+alembic\versions\013_255cda0c3fd2_add_notes_to_jobs.py,.py,0.77,2026-09-01 12:41:54
+alembic\versions\014_20260908_phase4_slice1_foundation.py,.py,8.31,2026-09-08 17:20:41

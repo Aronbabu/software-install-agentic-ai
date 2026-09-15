@@ -21,7 +21,11 @@ Invoke-RestMethod `
 -Method Get | ConvertTo-Json -Depth 8
 
 
-
+Invoke-RestMethod http://127.0.0.1:8005/api/v1/jobs
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" |
+ConvertTo-Json -Depth 10
+`
 --
 
 
@@ -43,3 +47,53 @@ $response = Invoke-RestMethod `
   } | ConvertTo-Json -Depth 5)
 
 $response
+
+
+--
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000208"
+      request_source   = "ADMIN_PORTAL"
+      request_reference= "PORTAL-001"
+
+      target_host      = "host.docker.internal"
+      target_port      = 2222
+      connection_method= "openssh"
+
+      os_type          = "linux"
+      software_name    = "curl"
+
+      requested_by     = "aron"
+      justification    = "Authorization validation"
+
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000209"
+      request_source   = "ADMIN_PORTAL"
+      request_reference= "PORTAL-002"
+
+      target_host      = "host.docker.internal"
+      target_port      = 2221
+      connection_method= "openssh"
+
+      os_type          = "linux"
+      software_name    = "curl"
+
+      requested_by     = "babu"
+      justification    = "Authorization validation"
+
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)

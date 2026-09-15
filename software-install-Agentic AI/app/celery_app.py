@@ -1,32 +1,43 @@
-import os
 from celery import Celery
+from kombu import Queue
+from app.config import settings
 
-
-CELERY_BROKER_URL = os.getenv(
-    "CELERY_BROKER_URL",
-    "redis://redis:6379/0"
-)
-
-CELERY_RESULT_BACKEND = os.getenv(
-    "CELERY_RESULT_BACKEND",
-    "redis://redis:6379/0"
-)
 
 celery_app = Celery(
     "software_install",
-    broker=CELERY_BROKER_URL,
-    backend=CELERY_RESULT_BACKEND,
+    broker=settings.CELERY_BROKER_URL,
+    backend=settings.CELERY_RESULT_BACKEND,
     include=[
-        "app.tasks.execution_tasks"
+        "app.tasks.orchestration_tasks",
+        "app.tasks.planning_tasks",
+        "app.tasks.execution_tasks",
     ],
 )
+
 celery_app.conf.update(
     task_track_started=True,
     result_expires=3600,
     worker_send_task_events=True,
     task_send_sent_event=True,
+    task_default_queue=settings.CELERY_QUEUE_EXECUTION,
+    task_queues=(
+        Queue(settings.CELERY_QUEUE_ORCHESTRATION),
+        Queue(settings.CELERY_QUEUE_PLANNING),
+        Queue(settings.CELERY_QUEUE_EXECUTION),
+        Queue(settings.CELERY_QUEUE_VERIFICATION),
+        Queue(settings.CELERY_QUEUE_RECOVERY),
+    ),
+    task_routes={
+        "app.tasks.orchestration_tasks.orchestrate_job_task": {
+            "queue": settings.CELERY_QUEUE_ORCHESTRATION,
+        },
+        "app.tasks.planning_tasks.generate_plan_task": {
+            "queue": settings.CELERY_QUEUE_PLANNING,
+        },
+        "app.tasks.execution_tasks.process_job_task": {
+            "queue": settings.CELERY_QUEUE_EXECUTION,
+        },
+    },
 )
-celery_app.conf.task_track_started = True
-celery_app.conf.result_expires = 3600
 
 celery_app.autodiscover_tasks(["app.tasks"])

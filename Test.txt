@@ -63,6 +63,19 @@ Invoke-RestMethod `
 🔹 Components working together
 
 
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/execute" `
+-Method Post
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$($response.id)/progress" `
+-Method Get | ConvertTo-Json -Depth 8
+
+
+Invoke-RestMethod http://127.0.0.1:8005/api/v1/jobs
+Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" |
+ConvertTo-Json -Depth 10
 
 ComponentStatusFastAPI APIs✅PostgreSQL (jobs, steps)✅Alembic migrations✅Lifecycle engine✅Execution service✅OS-based executor logic✅API-driven orchestration✅
 
@@ -73,7 +86,7 @@ Invoke-RestMethod `
 
 to test software status on container linux vm
 
-ssh root@127.0.0.1 -p 2222
+ssh root@127.0.0.1 -p 2221
 password : root
 vim --version
 
@@ -84,14 +97,125 @@ $response = Invoke-RestMethod `
   -Method Post `
   -ContentType "application/json" `
   -Body (@{
-      ticket_id        = "RITM9000206"
+      ticket_id        = "RITM9000207"
       target_host      = "host.docker.internal"
       os_type          = "linux"
       software_name    = "curl"
       software_version = "latest"
-      requested_by     = "aronbabu"
+      requested_by     = "aron"
       justification    = "Docker Linux SSH test through Redis Celery"
       max_retries      = 3
       timeout_seconds  = 300
       execution_mode   = "immediate"
   } | ConvertTo-Json -Depth 5)
+
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9000207"
+      target_host      = "host.docker.internal"
+      target_port      = 2222
+      os_type          = "linux"
+      software_name    = "curl"
+      software_version = "latest"
+      requested_by     = "aron"
+      justification    = "Docker Linux SSH test through Redis Celery"
+      max_retries      = 3
+      timeout_seconds  = 300
+      execution_mode   = "immediate"
+  } | ConvertTo-Json -Depth 5)
+
+\\to remove sudo apt remove curl -y or  apt remove curl -y
+
+apt remove curl
+
+
+# ServiceNow calls this endpoint
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -Headers @{"X-API-Key" = "svc_8foW4E6x9wG0lO6lqBwEAOWUpFc5Ije0FJHY-FCSgyU"} `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9999103"
+      request_source   = "SERVICENOW"
+      request_reference= "RITM9999103"
+      target_host      = "host.docker.internal"
+      target_port      = 2222
+      connection_method= "openssh"
+      os_type          = "linux"
+      software_name    = "git"
+      software_version = "latest"
+      requested_by     = "aron"
+      justification    = "User requested curl installation"
+  } | ConvertTo-Json)
+
+
+for local:
+
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -Headers @{"X-API-Key" = "svc_8foW4E6x9wG0lO6lqBwEAOWUpFc5Ije0FJHY-FCSgyU"} `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "RITM9999107"
+      request_source   = "SERVICENOW"
+      request_reference= "RITM9999107"
+      target_host      = "127.0.0.1"
+      target_port      = 2221
+      connection_method= "openssh"
+      os_type          = "linux"
+      software_name    = "git"
+      software_version = "latest"
+      requested_by     = "aron"
+      justification    = "User requested curl installation"
+  } | ConvertTo-Json)
+$jobId = $response.id
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$jobId/execute" `
+-Method Post
+
+# ✅ Should return job and AUTO-QUEUE it
+# Check: docker logs -f software-install-worker
+
+option 2: portal execution
+# Portal calls this endpoint
+$response = Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body (@{
+      ticket_id        = "PORTAL-022"
+      request_source   = "ADMIN_PORTAL"
+      target_host      = "host.docker.internal"
+      target_port      = 2222
+      connection_method= "openssh"
+      os_type          = "linux"
+      software_name    = "vim"
+      software_version = "latest"
+      requested_by     = "aron"
+      justification    = "Test from portal"
+  } | ConvertTo-Json)
+
+$jobId = $response.id
+
+# Job is created but NOT queued - stays PENDING
+# Manually trigger execution
+//old Invoke-RestMethod `
+  -Uri "http://127.0.0.1:8000/api/v1/jobs/$jobId/execute?requested_by=aronbabu" `
+  -Method Post
+
+
+Invoke-RestMethod `
+-Uri "http://127.0.0.1:8000/api/v1/jobs/$jobId/execute" `
+-Method Post
+
+# ✅ Now job queues for execution
+
+
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/jobs/$jobId/ledger
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/jobs/$jobId/ledger/summary

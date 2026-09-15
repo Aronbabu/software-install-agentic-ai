@@ -1,4 +1,3 @@
-# app/tasks/execution_tasks.py
 from app.celery_app import celery_app
 from app.db import SessionLocal
 from app.models.job import Job, JobStatus
@@ -25,10 +24,18 @@ def process_job_task(self, job_id: str):
                 job_id=job.id,
                 step_name="celery_task_received",
                 status="SUCCESS",
-                message=f"Celery worker received task. celery_task_id={self.request.id}",
+                message=f"Celery worker received execution task. celery_task_id={self.request.id}",
                 exit_code=0,
             )
             db.commit()
+
+            if job.status == JobStatus.PLAN_READY:
+                update_job_status(
+                    db=db,
+                    job=job,
+                    new_status=JobStatus.RUNNING,
+                    message="Execution started from plan-ready state.",
+                )
 
         process_job(job_id)
 
@@ -40,7 +47,7 @@ def process_job_task(self, job_id: str):
                 job_id=job.id,
                 step_name="celery_task_completed",
                 status="SUCCESS",
-                message=f"Celery task completed. celery_task_id={self.request.id}",
+                message=f"Celery execution task completed. celery_task_id={self.request.id}",
                 exit_code=0,
             )
             db.commit()
@@ -65,7 +72,7 @@ def process_job_task(self, job_id: str):
                     job_id=job.id,
                     step_name="celery_task_failed",
                     status="FAILED",
-                    message=f"Celery task failed. error={str(exc)}",
+                    message=f"Celery execution task failed. error={str(exc)}",
                     exit_code=1,
                 )
 
@@ -73,12 +80,13 @@ def process_job_task(self, job_id: str):
                     JobStatus.SUCCESS,
                     JobStatus.FAILED,
                     JobStatus.FAILED_FINAL,
+                    JobStatus.REVIEW_REQUIRED,
                 ]:
                     update_job_status(
                         db=db,
                         job=job,
                         new_status=JobStatus.FAILED,
-                        message=f"Celery task failed: {str(exc)}",
+                        message=f"Celery execution task failed: {str(exc)}",
                     )
 
                 db.commit()

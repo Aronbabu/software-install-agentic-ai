@@ -14,3 +14,6 @@ redis
 flower
 msal
 pyjwt
+openai
+pgvector
+tiktoken

@@ -1,0 +1,6 @@
+git.txt
+*.token
+*.secret
+.env
+.env.*
+envbackup

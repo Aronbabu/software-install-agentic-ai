@@ -1,0 +1,166 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: software-install-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Kolkata
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: software-install-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
+    environment:
+      TZ: Asia/Kolkata
+
+  api:
+    build: .
+    container_name: software-install-api
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CELERY_QUEUE_ORCHESTRATION: job_orchestration
+      CELERY_QUEUE_PLANNING: ai_planning
+      CELERY_QUEUE_EXECUTION: execution
+      CELERY_QUEUE_VERIFICATION: verification
+      CELERY_QUEUE_RECOVERY: ai_recovery
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-02-01}
+      AZURE_OPENAI_GPT_DEPLOYMENT: ${AZURE_OPENAI_GPT_DEPLOYMENT:-gpt-4o}
+      AZURE_OPENAI_EMBED_DEPLOYMENT: ${AZURE_OPENAI_EMBED_DEPLOYMENT:-text-embedding-3-small}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-1536}
+      TZ: Asia/Kolkata
+
+  worker-orchestration:
+    build: .
+    container_name: software-install-worker-orchestration
+    command: celery -A app.celery_app:celery_app worker --loglevel=info -Q job_orchestration -E
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CELERY_QUEUE_ORCHESTRATION: job_orchestration
+      CELERY_QUEUE_PLANNING: ai_planning
+      CELERY_QUEUE_EXECUTION: execution
+      CELERY_QUEUE_VERIFICATION: verification
+      CELERY_QUEUE_RECOVERY: ai_recovery
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-02-01}
+      AZURE_OPENAI_GPT_DEPLOYMENT: ${AZURE_OPENAI_GPT_DEPLOYMENT:-gpt-4o}
+      AZURE_OPENAI_EMBED_DEPLOYMENT: ${AZURE_OPENAI_EMBED_DEPLOYMENT:-text-embedding-3-small}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-1536}
+      TZ: Asia/Kolkata
+
+  worker-planning:
+    build: .
+    container_name: software-install-worker-planning
+    command: celery -A app.celery_app:celery_app worker --loglevel=info -Q ai_planning -E
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CELERY_QUEUE_ORCHESTRATION: job_orchestration
+      CELERY_QUEUE_PLANNING: ai_planning
+      CELERY_QUEUE_EXECUTION: execution
+      CELERY_QUEUE_VERIFICATION: verification
+      CELERY_QUEUE_RECOVERY: ai_recovery
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-02-01}
+      AZURE_OPENAI_GPT_DEPLOYMENT: ${AZURE_OPENAI_GPT_DEPLOYMENT:-gpt-4o}
+      AZURE_OPENAI_EMBED_DEPLOYMENT: ${AZURE_OPENAI_EMBED_DEPLOYMENT:-text-embedding-3-small}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-1536}
+      TZ: Asia/Kolkata
+
+  worker-execution:
+    build: .
+    container_name: software-install-worker-execution
+    command: celery -A app.celery_app:celery_app worker --loglevel=info -Q execution -E
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: software_install
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CELERY_QUEUE_ORCHESTRATION: job_orchestration
+      CELERY_QUEUE_PLANNING: ai_planning
+      CELERY_QUEUE_EXECUTION: execution
+      CELERY_QUEUE_VERIFICATION: verification
+      CELERY_QUEUE_RECOVERY: ai_recovery
+      SSH_USERNAME: root
+      SSH_PASSWORD: root
+      SSH_PORT: 2222
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-2024-02-01}
+      AZURE_OPENAI_GPT_DEPLOYMENT: ${AZURE_OPENAI_GPT_DEPLOYMENT:-gpt-4o}
+      AZURE_OPENAI_EMBED_DEPLOYMENT: ${AZURE_OPENAI_EMBED_DEPLOYMENT:-text-embedding-3-small}
+      AI_EMBEDDING_DIMENSION: ${AI_EMBEDDING_DIMENSION:-1536}
+      TZ: Asia/Kolkata
+
+  flower:
+    image: mher/flower
+    container_name: software-install-flower
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    command: celery --broker=redis://redis:6379/0 flower
+    depends_on:
+      - redis
+      - worker-orchestration
+      - worker-planning
+      - worker-execution
+    environment:
+      TZ: Asia/Kolkata
+
+volumes:
+  pgdata:
+  redisdata:

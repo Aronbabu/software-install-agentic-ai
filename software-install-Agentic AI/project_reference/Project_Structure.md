@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: 2026-09-01 11:43:21.782606
+Generated: 2026-09-09 11:17:55.443112
 
 ```text
 software-install-Agentic AI
@@ -17,11 +17,15 @@ software-install-Agentic AI
 │   │   ├── 009_861e52f4c182_minimum_decision_ledger.py
 │   │   ├── 010_4d02e3285388_add_service_account_credentials_table.py
 │   │   ├── 011_a809fac38d62_update_audit_fields.py
-│   │   └── 012_9a91edbf6e39_create_software_catalogue.py
+│   │   ├── 012_9a91edbf6e39_create_software_catalogue.py
+│   │   ├── 013_255cda0c3fd2_add_notes_to_jobs.py
+│   │   └── 014_20260908_phase4_slice1_foundation.py
 │   ├── env.py
 │   ├── README
 │   └── script.py.mako
 ├── app
+│   ├── ai
+│   │   └── __init__.py
 │   ├── db
 │   │   ├── __init__.py
 │   │   ├── base.py
@@ -32,14 +36,22 @@ software-install-Agentic AI
 │   │   ├── linux_executor.py
 │   │   ├── result_models.py
 │   │   └── windows_executor.py
+│   ├── knowledge
+│   │   └── __init__.py
 │   ├── models
 │   │   ├── __init__.py
+│   │   ├── ai_request.py
+│   │   ├── ai_response.py
 │   │   ├── audit.py
 │   │   ├── catalogue.py
 │   │   ├── catalogue_constants.py
+│   │   ├── execution_plan.py
 │   │   ├── job.py
+│   │   ├── knowledge_article.py
+│   │   ├── knowledge_chunk.py
 │   │   ├── ledger.py
-│   │   └── security.py
+│   │   ├── security.py
+│   │   └── sop_repository.py
 │   ├── queue
 │   │   ├── __init__.py
 │   │   └── job_queue.py
@@ -66,7 +78,9 @@ software-install-Agentic AI
 │   │   └── ledger_service.py
 │   ├── tasks
 │   │   ├── __init__.py
-│   │   └── execution_tasks.py
+│   │   ├── execution_tasks.py
+│   │   ├── orchestration_tasks.py
+│   │   └── planning_tasks.py
 │   ├── workers
 │   │   └── celery_worker.py
 │   ├── __init__.py
@@ -78,6 +92,12 @@ software-install-Agentic AI
 │   ├── middleware.py
 │   ├── schemas_test.py
 │   └── seed_catalogue.py
+├── backup
+│   └── phase3
+│       ├── .env
+│       ├── docker-compose.yml
+│       ├── Dockerfile
+│       └── phase3_software_install_demo_backup.sql
 ├── entra-test
 │   ├── .env
 │   ├── app.py
@@ -140,6 +160,9 @@ software-install-Agentic AI
 │   │   ├── current_status.md
 │   │   ├── master flow.md
 │   │   └── new_hybrid_mvp_full.md
+│   ├── project_reference
+│   │   ├── Project_File_Inventory.csv
+│   │   └── Project_Structure.md
 │   ├── generate_project_structure.py
 │   ├── Master_Context copy.md
 │   ├── Master_Context.md
@@ -167,6 +190,8 @@ software-install-Agentic AI
 ├── .dockerignore
 ├── .env
 ├── .env.example
+├── .env.local
+├── .envbackup
 ├── alembic.ini
 ├── codebase_structure.txt
 ├── createfiest.py
@@ -174,12 +199,15 @@ software-install-Agentic AI
 ├── docker-compose copy 2.yml
 ├── docker-compose copy 3.yml
 ├── docker-compose copy.yml
+├── docker-compose.local-infra.yml
 ├── docker-compose.yml
+├── docker-compose_phase4.yml
 ├── docker-compose_redis.yml
 ├── docker-compose_updated.yml
 ├── Dockerfile
 ├── fs2.txt
 ├── implementations.md
+├── locaenv.txt
 ├── portal_implementations.md
 ├── README.md
 ├── redistest.py

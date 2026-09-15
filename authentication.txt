@@ -145,3 +145,4 @@ Future API Requests
 
  alembic revision --autogenerate -m "authorization foundation and request source"
 alembic upgrade head
+alembic current
