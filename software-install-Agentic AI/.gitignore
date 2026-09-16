@@ -1,6 +1,23 @@
-git.txt
-*.token
-*.secret
+# secrets
 .env
 .env.*
+*.token
+*.secret
 envbackup
+
+# python
+__pycache__/
+*.pyc
+
+# virtual env
+venvswinst/
+venv/
+.venv/
+
+# ide
+.vscode/
+.idea/
+
+# backups
+backup/
+*-in memory/

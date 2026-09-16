@@ -1,33 +1,11 @@
-app/
-  ai/
-    azure_openai_client.py
-    embeddings_service.py
-    planning_service.py
-    recovery_service.py
-    prompt_templates.py
-    response_validators.py
-  knowledge/
-    ingestion_service.py
-    retrieval_service.py
-    chunking.py
-  models/
-    sop_repository.py
-    knowledge_article.py
-    knowledge_chunk.py
-    ai_request.py
-    ai_response.py
-    execution_plan.py
-  schemas/
-    ai_plan.py
-    recovery_analysis.py
-  workers/
-    celery_app.py
-    orchestration_tasks.py
-    planning_tasks.py
-    execution_tasks.py
-    verification_tasks.py
-    recovery_tasks.py
-  services/
-    orchestration_service.py
-    audit_service.py
-    ledger_service.py
+
+"""Knowledge service package."""
+
+from .chunking import chunk_text
+from .ingestion_service import ingest_knowledge_article, ingest_sop_document
+
+__all__ = [
+    "chunk_text",
+    "ingest_sop_document",
+    "ingest_knowledge_article",
+]

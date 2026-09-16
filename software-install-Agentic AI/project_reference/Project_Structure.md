@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: 2026-09-09 11:17:55.443112
+Generated: 2026-09-16 11:23:12.160505
 
 ```text
 software-install-Agentic AI
@@ -19,13 +19,16 @@ software-install-Agentic AI
 │   │   ├── 011_a809fac38d62_update_audit_fields.py
 │   │   ├── 012_9a91edbf6e39_create_software_catalogue.py
 │   │   ├── 013_255cda0c3fd2_add_notes_to_jobs.py
-│   │   └── 014_20260908_phase4_slice1_foundation.py
+│   │   ├── 014_20260908_phase4_slice1_foundation.py
+│   │   └── 015_phase4_job_status_enum_fix.py
 │   ├── env.py
 │   ├── README
 │   └── script.py.mako
 ├── app
 │   ├── ai
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── azure_openai_client.py
+│   │   └── embeddings_service.py
 │   ├── db
 │   │   ├── __init__.py
 │   │   ├── base.py
@@ -37,7 +40,9 @@ software-install-Agentic AI
 │   │   ├── result_models.py
 │   │   └── windows_executor.py
 │   ├── knowledge
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── chunking.py
+│   │   └── ingestion_service.py
 │   ├── models
 │   │   ├── __init__.py
 │   │   ├── ai_request.py
@@ -62,8 +67,31 @@ software-install-Agentic AI
 │   │   ├── jobs.py
 │   │   ├── ledger_api.py
 │   │   └── monitor_api.py
+│   ├── sample_docs
+│   │   ├── knowledge
+│   │   │   ├── linux
+│   │   │   │   ├── linux_curl_troubleshooting.md
+│   │   │   │   ├── linux_git_troubleshooting.md
+│   │   │   │   └── linux_vim_troubleshooting.md
+│   │   │   └── windows
+│   │   │       ├── windows_7zip_troubleshooting.md
+│   │   │       ├── windows_git_troubleshooting.md
+│   │   │       └── windows_notepadpp_troubleshooting.md
+│   │   └── sop
+│   │       ├── linux
+│   │       │   ├── linux_curl_install.md
+│   │       │   ├── linux_git_install.md
+│   │       │   └── linux_vim_install.md
+│   │       └── windows
+│   │           ├── windows_7zip_install.md
+│   │           ├── windows_git_install.md
+│   │           └── windows_notepadpp_install.md
 │   ├── schemas
 │   │   └── job_create.py
+│   ├── scripts
+│   │   ├── __init__.py
+│   │   ├── ingest_sop.py
+│   │   └── retrieval_service.py
 │   ├── services
 │   │   ├── __init__.py
 │   │   ├── audit_service.py
@@ -161,8 +189,8 @@ software-install-Agentic AI
 │   │   ├── master flow.md
 │   │   └── new_hybrid_mvp_full.md
 │   ├── project_reference
-│   │   ├── Project_File_Inventory.csv
-│   │   └── Project_Structure.md
+│   │   ├── Project_File_Inventory1.csv
+│   │   └── Project_Structure1.md
 │   ├── generate_project_structure.py
 │   ├── Master_Context copy.md
 │   ├── Master_Context.md
@@ -191,7 +219,7 @@ software-install-Agentic AI
 ├── .env
 ├── .env.example
 ├── .env.local
-├── .envbackup
+├── .gitignore
 ├── alembic.ini
 ├── codebase_structure.txt
 ├── createfiest.py
@@ -205,6 +233,7 @@ software-install-Agentic AI
 ├── docker-compose_redis.yml
 ├── docker-compose_updated.yml
 ├── Dockerfile
+├── envbackup
 ├── fs2.txt
 ├── implementations.md
 ├── locaenv.txt
@@ -215,6 +244,9 @@ software-install-Agentic AI
 ├── repo_structure1.txt
 ├── repo_structure1stsep.txt
 ├── requirements.txt
+├── temp_debug_azure_openai_client.py
+├── temp_test_linux_retrieval.py
+├── temp_test_windows_retrieval.py
 ├── test.py
 ├── test1.py
 └── utility.py

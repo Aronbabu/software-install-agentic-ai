@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     CELERY_QUEUE_VERIFICATION: str = "verification"
     CELERY_QUEUE_RECOVERY: str = "ai_recovery"
 
-    AZURE_OPENAI_ENDPOINT: str = "https://458027-3271-resource.openai.azure.com/openai/v1"
+    AZURE_OPENAI_ENDPOINT: str = "https://458027-3271-resource.openai.azure.com/"
     AZURE_OPENAI_KEY: str = "Aus7vMhAK5AJB2srcsqIbRNblMcPvUv1Ph0eIKUWV51aMpcj95FGJQQJ99BFACHYHv6XJ3w3AAAAACOGKl0afz"
     AZURE_OPENAI_API_VERSION: str = "2024-02-01"
     AZURE_OPENAI_GPT_DEPLOYMENT: str = "gpt-4o"

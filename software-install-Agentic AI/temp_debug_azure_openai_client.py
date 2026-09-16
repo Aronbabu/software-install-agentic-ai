@@ -1,0 +1,6 @@
+import os
+from app.config import settings
+
+print("AZURE_OPENAI_ENDPOINT =", settings.AZURE_OPENAI_ENDPOINT)
+print("AZURE_OPENAI_API_VERSION =", settings.AZURE_OPENAI_API_VERSION)
+print("AZURE_OPENAI_EMBED_DEPLOYMENT =", settings.AZURE_OPENAI_EMBED_DEPLOYMENT)
