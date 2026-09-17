@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: 2026-09-16 11:23:12.160505
+Generated: 2026-09-16 19:15:29.704155
 
 ```text
 software-install-Agentic AI
@@ -28,7 +28,10 @@ software-install-Agentic AI
 │   ├── ai
 │   │   ├── __init__.py
 │   │   ├── azure_openai_client.py
-│   │   └── embeddings_service.py
+│   │   ├── embeddings_service.py
+│   │   ├── planning_service.py
+│   │   ├── prompt_templates.py
+│   │   └── response_validators.py
 │   ├── db
 │   │   ├── __init__.py
 │   │   ├── base.py
@@ -66,7 +69,8 @@ software-install-Agentic AI
 │   │   ├── dashboard.py
 │   │   ├── jobs.py
 │   │   ├── ledger_api.py
-│   │   └── monitor_api.py
+│   │   ├── monitor_api.py
+│   │   └── planning_reference_api.py
 │   ├── sample_docs
 │   │   ├── knowledge
 │   │   │   ├── linux
@@ -87,7 +91,11 @@ software-install-Agentic AI
 │   │           ├── windows_git_install.md
 │   │           └── windows_notepadpp_install.md
 │   ├── schemas
-│   │   └── job_create.py
+│   │   ├── ai_plan.py
+│   │   ├── execution_plan.py
+│   │   ├── job_create.py
+│   │   ├── review_resolution.py
+│   │   └── sop_repository.py
 │   ├── scripts
 │   │   ├── __init__.py
 │   │   ├── ingest_sop.py
@@ -103,7 +111,8 @@ software-install-Agentic AI
 │   │   ├── execution_service.py
 │   │   ├── job_lifecycle.py
 │   │   ├── job_service.py
-│   │   └── ledger_service.py
+│   │   ├── ledger_service.py
+│   │   └── review_resolution_service.py
 │   ├── tasks
 │   │   ├── __init__.py
 │   │   ├── execution_tasks.py

@@ -17,12 +17,14 @@ from app.schemas.job_create import (
     ExecuteResponse,
     JobProgressResponse,
 )
+from app.schemas.review_resolution import ReviewResolutionRequest, ReviewResolutionResponse
 from app.services.job_lifecycle import update_job_status, append_job_step
 from app.tasks.orchestration_tasks import orchestrate_job_task
 from app.services.authorization_service import AuthorizationService
 from app.services.audit_service import AuditService
 from app.services.ledger_service import LedgerService
 from app.services.catalogue_rules import is_source_allowed
+from app.services.review_resolution_service import ReviewResolutionService
 
 logger = logging.getLogger("app.routes.jobs")
 router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
@@ -124,7 +126,11 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
         target_port=(
             int(payload.target_port)
             if getattr(payload, "target_port", None) is not None
-            else (int(catalogue_item.target_port) if catalogue_item and catalogue_item.target_port else None)
+            else (
+                int(catalogue_item.target_port)
+                if catalogue_item and catalogue_item.target_port
+                else None
+            )
         ),
         os_type=(
             catalogue_item.os_type if catalogue_item else payload.os_type
@@ -292,7 +298,7 @@ def create_job(payload: JobCreate, request: Request, db: Session = Depends(get_d
                 status="SUCCESS",
                 message=f"ServiceNow request auto-queued to orchestrator. celery_task_id={task.id}",
                 exit_code=0,
-        )
+            )
 
             AuditService.record_event(
                 db=db,
@@ -406,10 +412,15 @@ def execute(job_id: str, db: Session = Depends(get_db)):
                 detail="Job is scheduled for later execution",
             )
 
-    if job.status in [JobStatus.SUCCESS, JobStatus.FAILED, JobStatus.FAILED_FINAL]:
+    if job.status in [
+        JobStatus.SUCCESS,
+        JobStatus.FAILED,
+        JobStatus.FAILED_FINAL,
+        JobStatus.REVIEW_REQUIRED,
+    ]:
         raise HTTPException(
             status_code=400,
-            detail="Job already completed",
+            detail=f"Job cannot be queued for execution in status '{job.status.value}'",
         )
 
     allowed = AuthorizationService.authorize_execution(
@@ -526,3 +537,26 @@ def get_job_progress(job_id: str, db: Session = Depends(get_db)):
             for s in steps
         ],
     }
+
+
+@router.post("/{job_id}/resolve-review", response_model=ReviewResolutionResponse)
+def resolve_job_review(
+    job_id: str,
+    payload: ReviewResolutionRequest,
+    db: Session = Depends(get_db),
+):
+    service = ReviewResolutionService(db)
+    try:
+        result = service.resolve_review(job_id=job_id, payload=payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    return ReviewResolutionResponse(
+        job_id=result["job_id"],
+        status=result["status"],
+        resolution_type=result["resolution_type"],
+        execution_plan_id=result.get("execution_plan_id"),
+        selected_plan_id=result.get("selected_plan_id"),
+        selected_sop_id=result.get("selected_sop_id"),
+        message=result["message"],
+    )

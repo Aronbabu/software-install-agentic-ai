@@ -15,6 +15,12 @@ export interface Job {
   requested_by?: string;
   justification?: string;
 
+  current_plan_id?: string | null;
+  operator_review_required?: boolean;
+  review_reason?: string | null;
+  notes?: string | null;
+  trace_id?: string | null;
+
   created_at: string;
   updated_at: string;
 }

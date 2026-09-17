@@ -166,7 +166,7 @@ $response = Invoke-RestMethod `
       request_source   = "SERVICENOW"
       request_reference= "RITM9999107"
       target_host      = "127.0.0.1"
-      target_port      = 2221
+      target_port      = 2222
       connection_method= "openssh"
       os_type          = "linux"
       software_name    = "git"
@@ -201,6 +201,7 @@ $response = Invoke-RestMethod `
       justification    = "Test from portal"
   } | ConvertTo-Json)
 
+// for docker full, use host.docker.internal or in local uvicorn, use 127.0.0.1
 $jobId = $response.id
 
 # Job is created but NOT queued - stays PENDING

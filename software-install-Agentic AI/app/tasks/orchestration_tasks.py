@@ -14,13 +14,32 @@ def orchestrate_job_task(self, job_id: str):
     db = SessionLocal()
     try:
         job = db.query(Job).filter(Job.id == job_id).first()
+        
         if not job:
             return {
                 "job_id": job_id,
                 "status": "not_found",
                 "celery_task_id": self.request.id,
             }
+        if job.status == JobStatus.REVIEW_REQUIRED:
+            append_job_step(
+                db=db,
+                job_id=job.id,
+                step_name="manual_review_pending",
+                status="SUCCESS",
+                message=(
+                    "Planning completed with REVIEW_REQUIRED. "
+                    "Execution will not be queued until manual review."
+                ),
+                exit_code=0,
+            )
+            db.commit()
 
+            return {
+                "job_id": job_id,
+                "status": "review_required",
+                "celery_task_id": self.request.id,
+            }
         append_job_step(
             db=db,
             job_id=job.id,
@@ -69,6 +88,26 @@ def orchestrate_job_task(self, job_id: str):
             return {
                 "job_id": job_id,
                 "status": "execution_dispatched",
+                "celery_task_id": self.request.id,
+            }
+
+        if job.status == JobStatus.REVIEW_REQUIRED:
+            append_job_step(
+                db=db,
+                job_id=job.id,
+                step_name="review_required_detected",
+                status="SUCCESS",
+                message=(
+                    "Planning completed with REVIEW_REQUIRED. "
+                    "Execution will not be queued until manual review."
+                ),
+                exit_code=0,
+            )
+            db.commit()
+
+            return {
+                "job_id": job_id,
+                "status": "review_required",
                 "celery_task_id": self.request.id,
             }
 

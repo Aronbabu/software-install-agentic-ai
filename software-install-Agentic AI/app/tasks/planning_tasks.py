@@ -1,9 +1,8 @@
 from app.celery_app import celery_app
-from app.db import SessionLocal
-from app.models.execution_plan import ExecutionPlan
-from app.models.job import Job, JobStatus
-from app.services.job_lifecycle import append_job_step, attach_plan_to_job, update_job_status
 from app.config import settings
+from app.db import SessionLocal
+from app.models.job import Job
+from app.services.job_lifecycle import append_job_step
 
 
 @celery_app.task(
@@ -14,6 +13,8 @@ from app.config import settings
 def generate_plan_task(self, job_id: str):
     db = SessionLocal()
     try:
+        from app.ai.planning_service import plan_job
+
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
             return {
@@ -32,35 +33,34 @@ def generate_plan_task(self, job_id: str):
         )
         db.commit()
 
-        # Slice 1 placeholder plan.
-        plan = ExecutionPlan(
-            job_id=job.id,
-            summary=f"Placeholder Phase 4 plan for {job.software_name} on {job.os_type}",
-            target_platform=job.os_type,
-            review_status="PENDING_REVIEW",
-            approved_for_execution=False,
-            selected_sop_reference=None,
-        )
-        db.add(plan)
-        db.commit()
-        db.refresh(plan)
+        result = plan_job(db=db, job=job)
 
-        attach_plan_to_job(db=db, job=job, execution_plan_id=plan.id)
+        if result.outcome.value == "REVIEW_REQUIRED":
+            append_job_step(
+                db=db,
+                job_id=job.id,
+                step_name="planning_review_required",
+                status="SUCCESS",
+                message=result.review.failure_reason if result.review else "Review required.",
+                exit_code=0,
+            )
+            db.commit()
 
-        job = db.query(Job).filter(Job.id == job_id).first()
-        update_job_status(
-            db=db,
-            job=job,
-            new_status=JobStatus.PLAN_READY,
-            message="Placeholder execution plan created.",
-        )
+            return {
+                "job_id": job_id,
+                "status": "review_required",
+                "execution_plan_id": result.execution_plan_id,
+                "ai_request_id": result.ai_request_id,
+                "ai_response_id": result.ai_response_id,
+                "celery_task_id": self.request.id,
+            }
 
         append_job_step(
             db=db,
             job_id=job.id,
             step_name="planning_completed",
             status="SUCCESS",
-            message=f"Planning completed. execution_plan_id={plan.id}",
+            message=f"Planning completed. execution_plan_id={result.execution_plan_id}",
             exit_code=0,
         )
         db.commit()
@@ -74,7 +74,9 @@ def generate_plan_task(self, job_id: str):
         return {
             "job_id": job_id,
             "status": "plan_ready",
-            "execution_plan_id": plan.id,
+            "execution_plan_id": result.execution_plan_id,
+            "ai_request_id": result.ai_request_id,
+            "ai_response_id": result.ai_response_id,
             "celery_task_id": self.request.id,
         }
 

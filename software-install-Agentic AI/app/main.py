@@ -13,6 +13,7 @@ from app.routes.dashboard import router as dashboard_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.ledger_api import router as ledger_router
 from app.routes.catalogue_api import router as catalogue_router
+from app.routes.planning_reference_api import router as planning_reference_router
 
 
 
@@ -45,6 +46,7 @@ app.include_router(monitoring_router)
 app.include_router(dashboard_router)
 app.include_router(ledger_router)
 app.include_router(catalogue_router)
+app.include_router(planning_reference_router)
 
 app.add_middleware(
     CORSMiddleware,

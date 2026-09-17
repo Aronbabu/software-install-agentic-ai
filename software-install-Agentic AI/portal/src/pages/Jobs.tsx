@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getJobs } from "../api/jobsApi";
 import StatusBadge from "../components/status/StatusBadge";
@@ -13,6 +13,11 @@ export default function Jobs() {
       .catch(console.error);
   }, []);
 
+  const reviewRequiredCount = useMemo(
+    () => jobs.filter((job) => job.status === "REVIEW_REQUIRED").length,
+    [jobs]
+  );
+
   return (
     <div className="page">
       <div className="page-header">
@@ -21,6 +26,20 @@ export default function Jobs() {
           <p className="page-subtitle">Recent installation requests and their statuses.</p>
         </div>
       </div>
+
+      {reviewRequiredCount > 0 && (
+        <div
+          className="card card-pad"
+          style={{
+            marginBottom: "16px",
+            border: "1px solid #f59e0b",
+            background: "#fffbeb",
+          }}
+        >
+          <strong>{reviewRequiredCount} job(s) require manual review.</strong>{" "}
+          Open the job details page to resolve them.
+        </div>
+      )}
 
       <div className="card card-pad table-wrap">
         <table className="table">

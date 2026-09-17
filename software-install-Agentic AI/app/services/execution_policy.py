@@ -69,7 +69,14 @@ APPROVED_PACKAGES = {
             }
     }
 }
+def is_approved_software(os_type: str, software_name: str) -> bool:
+    os_type = (os_type or "").strip().lower()
+    software_name = (software_name or "").strip().lower()
 
+    try:
+        return software_name in APPROVED_PACKAGES[os_type]
+    except KeyError:
+        return False
 # "command": 'echo "Installing curl"'
 
 def get_execution_command(os_type: str, software_name: str, software_version: str | None = None):
